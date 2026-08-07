@@ -6,30 +6,50 @@
 <title>Kullanım Koşulları — Bağlantılar</title>
 <meta name="robots" content="index,follow">
 <style>
-  :root { color-scheme: dark; }
+  :root {
+    --kagit: #f4efe3; --murekkep: #201b16; --soluk: #6c6153;
+    --cizgi: #cdc2ac; --cizgi-koyu: #201b16; --vurgu: #8f2d1e;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --kagit: #17130f; --murekkep: #ece3d2; --soluk: #a99d88;
+      --cizgi: #372f26; --cizgi-koyu: #ece3d2; --vurgu: #d0664c; color-scheme: dark; }
+  }
+  * { box-sizing: border-box; }
   body {
     margin: 0;
-    background: #15171c;
-    color: #eef0f4;
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-    line-height: 1.6;
+    background: var(--kagit);
+    color: var(--murekkep);
+    font-family: Georgia, "Iowan Old Style", "Times New Roman", serif;
+    line-height: 1.65;
   }
-  .sayfa { max-width: 46rem; margin: 0 auto; padding: 2rem 1.25rem 4rem; }
-  a { color: #7b8cff; }
-  h1 { font-size: 1.6rem; margin: .5rem 0 .25rem; }
-  h2 { font-size: 1.15rem; margin: 2rem 0 .5rem; }
-  p, li { font-size: .95rem; }
-  .tarih { color: #98a0af; font-size: .85rem; margin-top: 0; }
-  .geri { display: inline-block; margin-bottom: 1.5rem; color: #98a0af; text-decoration: none; }
-  .geri:hover { color: #eef0f4; }
+  .sayfa { max-width: 44rem; margin: 0 auto; padding: 2.5rem 1.25rem 4rem; }
+  a { color: var(--vurgu); }
+  .geri {
+    display: inline-block; margin-bottom: 1.5rem; color: var(--soluk);
+    text-decoration: none; font-size: .72rem; letter-spacing: .16em; text-transform: uppercase;
+  }
+  .geri:hover { color: var(--murekkep); }
+  .eyebrow { font-size: .64rem; letter-spacing: .32em; text-transform: uppercase; color: var(--soluk); }
+  h1 {
+    font-size: 2.4rem; font-weight: 800; margin: .3rem 0 .4rem; letter-spacing: -.01em;
+    border-bottom: 3px double var(--cizgi-koyu); padding-bottom: .5rem;
+  }
+  h2 { font-size: 1.2rem; margin: 2rem 0 .5rem; }
+  p, li { font-size: 1rem; }
+  .tarih { color: var(--soluk); font-size: .8rem; letter-spacing: .1em; text-transform: uppercase; margin: 0 0 1.5rem; }
   ul { padding-left: 1.2rem; }
-  footer { margin-top: 3rem; border-top: 1px solid #313742; padding-top: 1rem; color: #98a0af; font-size: .85rem; }
+  footer {
+    margin-top: 3rem; border-top: 1px solid var(--cizgi); padding-top: 1rem;
+    color: var(--soluk); font-size: .8rem; letter-spacing: .04em;
+  }
 </style>
 </head>
 <body>
 <div class="sayfa">
   <a class="geri" href="index.html">← Oyuna dön</a>
 
+  <div class="eyebrow">Bağlantılar</div>
   <h1>Kullanım Koşulları</h1>
   <p class="tarih">Son güncelleme: 7 Ağustos 2026</p>
 

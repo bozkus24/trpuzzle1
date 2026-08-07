@@ -8,7 +8,7 @@ kelime oyunu. NYT *Connections*'ın Türkçe uyarlaması — ama bulmacalar Tür
 ## Nasıl oynanır?
 
 - Izgarada **16 kelime** vardır; bunlar **4 kelimelik 4 gruba** aittir.
-- Bir grup seçmek için dört kelimeye dokunup **Gönder**'e basın.
+- Bir grup seçmek için dört kelimeye dokunup **Onayla**'ya basın.
 - Doğruysa grup açılır ve rengiyle üste yerleşir.
 - Yanlışsa bir **hak** gider. Toplam **4 hata** hakkınız var.
 - Seçtiğiniz dördün üçü aynı gruptaysa **"Bir tanesi yanlış!"** uyarısı gelir.
@@ -23,9 +23,11 @@ Renkler zorluğu gösterir: **sarı** (en kolay) → **yeşil** → **mavi** →
   oyun sayısı ve hata dağılımı.
 - **Paylaşım:** sonucu, her tahmini zorluk numaralarıyla (1–4) gösteren bir
   metin olarak panoya kopyalayıp paylaşma.
-- **Tema:** koyu / açık / sistem.
-- **Erişilebilirlik:** renk körlüğü modu (daha ayrık renkler + numara
-  rozetleri), klavye ile oynama (Enter ile gönder, Esc ile kapat).
+- **Tasarım:** *Broadsheet* editoryal gazete estetiği — gömülü Playfair Display
+  serif masthead, newsprint/mürekkep paleti, çift kural ve Türkçe dateline.
+- **Tema:** açık / koyu / sistem.
+- **Karıştır:** kalan kutuları animasyonlu (FLIP) yeniden dizer.
+- **Klavye:** Enter ile onayla, Esc ile kapat.
 - **Çevrimdışı dostu:** ilerleme ve ayarlar `localStorage` içinde tutulur;
   sunucuya veri gönderilmez, giriş gerekmez.
 
