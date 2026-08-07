@@ -13,16 +13,16 @@ kelime oyunu. NYT *Connections*'ın Türkçe uyarlaması — ama bulmacalar Tür
 - Yanlışsa bir **hak** gider. Toplam **4 hata** hakkınız var.
 - Seçtiğiniz dördün üçü aynı gruptaysa **"Bir tanesi yanlış!"** uyarısı gelir.
 
-Renkler zorluğu gösterir: 🟨 **sarı** (en kolay) → 🟩 **yeşil** → 🟦 **mavi** →
-🟪 **mor** (genelde bir kelime oyunu, en zor).
+Renkler zorluğu gösterir: **sarı** (en kolay) → **yeşil** → **mavi** →
+**mor** (genelde bir kelime oyunu, en zor).
 
 ## Özellikler
 
-- **Oyun modları:** 📅 Günlük (herkese aynı bulmaca) ve 🔄 Alıştırma (rastgele,
-  sınırsız — istatistiğe işlenmez).
+- **Günlük bulmaca:** herkese aynı, her gün yeni bulmaca.
 - **İstatistikler:** oynanan, kazanma yüzdesi, güncel/en uzun seri, kusursuz
   oyun sayısı ve hata dağılımı.
-- **Paylaşım:** sonucu emoji ızgarası olarak panoya kopyalayıp paylaşma.
+- **Paylaşım:** sonucu, her tahmini zorluk numaralarıyla (1–4) gösteren bir
+  metin olarak panoya kopyalayıp paylaşma.
 - **Tema:** koyu / açık / sistem.
 - **Erişilebilirlik:** renk körlüğü modu (daha ayrık renkler + numara
   rozetleri), klavye ile oynama (Enter ile gönder, Esc ile kapat).

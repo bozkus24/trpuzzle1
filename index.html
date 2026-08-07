@@ -160,30 +160,6 @@ header {
 .ikon:hover { background: var(--panel-2); color: var(--yazi); }
 .ikon:focus-visible { outline: 2px solid var(--vurgu); outline-offset: 1px; }
 
-/* Mod seçici */
-.mod {
-  display: flex;
-  background: var(--panel);
-  border: 1px solid var(--cizgi);
-  border-radius: 999px;
-  padding: 4px;
-  gap: 4px;
-  align-self: center;
-}
-.mod button {
-  border: none;
-  background: transparent;
-  color: var(--yazi-soluk);
-  font: inherit;
-  font-weight: 600;
-  font-size: .9rem;
-  padding: .45rem 1.1rem;
-  border-radius: 999px;
-  cursor: pointer;
-  transition: background .15s, color .15s;
-}
-.mod button[aria-selected="true"] { background: var(--vurgu); color: #fff; }
-
 .bilgi-satiri {
   text-align: center;
   color: var(--yazi-soluk);
@@ -509,16 +485,11 @@ select.sec {
       <small>Dört gizli grubu bul</small>
     </div>
     <div class="ust-butonlar">
-      <button class="ikon" id="btnYardim" title="Nasıl oynanır?" aria-label="Nasıl oynanır">❔</button>
-      <button class="ikon" id="btnIst" title="İstatistikler" aria-label="İstatistikler">📊</button>
-      <button class="ikon" id="btnAyar" title="Ayarlar" aria-label="Ayarlar">⚙️</button>
+      <button class="ikon" id="btnYardim" title="Nasıl oynanır?" aria-label="Nasıl oynanır"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.2a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1.1.9-1.1 1.8"/><circle cx="12" cy="16.6" r=".6" fill="currentColor" stroke="none"/></svg></button>
+      <button class="ikon" id="btnIst" title="İstatistikler" aria-label="İstatistikler"><svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><rect x="3.5" y="11" width="4" height="9" rx="1"/><rect x="10" y="5" width="4" height="15" rx="1"/><rect x="16.5" y="14" width="4" height="6" rx="1"/></svg></button>
+      <button class="ikon" id="btnAyar" title="Ayarlar" aria-label="Ayarlar"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="8" x2="20" y2="8"/><line x1="4" y1="16" x2="20" y2="16"/><circle cx="9" cy="8" r="2.7" fill="var(--panel)"/><circle cx="15" cy="16" r="2.7" fill="var(--panel)"/></svg></button>
     </div>
   </header>
-
-  <div class="mod" role="tablist" aria-label="Oyun modu">
-    <button role="tab" id="modGunluk" aria-selected="true">📅 Günlük</button>
-    <button role="tab" id="modAlistirma" aria-selected="false">🔄 Alıştırma</button>
-  </div>
 
   <div class="bilgi-satiri" id="bilgiSatiri"></div>
 
@@ -787,32 +758,22 @@ window.BaglantilarDepo = (function () {
     return liste;
   }
 
-  function yeniOyun(mod) {
-    if (mod === "gunluk") {
-      var gn = bugunNo();
-      var n = Veri.BULMACALAR.length;
-      var idx = ((gn - 1) % n + n) % n;
-      var kayit = Depo.gunluk(gn);
-      if (kayit && kayit.idx === idx) {
-        oyun = kayittanKur(kayit, "gunluk", gn, idx);
-        return;
-      }
-      var rng = mulberry32(gn * 2654435761);
-      oyun = {
-        mod: "gunluk", gunNo: gn, idx: idx,
-        siralama: karistir(kelimeListesiYap(Veri.BULMACALAR[idx]), rng),
-        secili: [], cozulen: [], tahminler: [], hata: 0, durum: "oyunda",
-        kaydedildi: false
-      };
-    } else {
-      var ridx = Math.floor(Math.random() * Veri.BULMACALAR.length);
-      oyun = {
-        mod: "alistirma", gunNo: null, idx: ridx,
-        siralama: karistir(kelimeListesiYap(Veri.BULMACALAR[ridx])),
-        secili: [], cozulen: [], tahminler: [], hata: 0, durum: "oyunda",
-        kaydedildi: false
-      };
+  function yeniOyun() {
+    var gn = bugunNo();
+    var n = Veri.BULMACALAR.length;
+    var idx = ((gn - 1) % n + n) % n;
+    var kayit = Depo.gunluk(gn);
+    if (kayit && kayit.idx === idx) {
+      oyun = kayittanKur(kayit, "gunluk", gn, idx);
+      return;
     }
+    var rng = mulberry32(gn * 2654435761);
+    oyun = {
+      mod: "gunluk", gunNo: gn, idx: idx,
+      siralama: karistir(kelimeListesiYap(Veri.BULMACALAR[idx]), rng),
+      secili: [], cozulen: [], tahminler: [], hata: 0, durum: "oyunda",
+      kaydedildi: false
+    };
   }
 
   function kayittanKur(kayit, mod, gn, idx) {
@@ -860,12 +821,11 @@ window.BaglantilarDepo = (function () {
   function cizBilgi() {
     var b = el("bilgiSatiri");
     if (oyun.durum === "oyunda") {
-      if (oyun.mod === "gunluk") b.innerHTML = "Bağlantılar <b>#" + oyun.gunNo + "</b> · Dört grubu bul";
-      else b.innerHTML = "Alıştırma · Dört grubu bul";
+      b.innerHTML = "Bağlantılar <b>#" + oyun.gunNo + "</b> · Dört grubu bul";
     } else if (oyun.durum === "kazandi") {
-      b.innerHTML = oyun.hata === 0 ? "Kusursuz! 🎉" : "Tebrikler, çözdün! 🎉";
+      b.textContent = oyun.hata === 0 ? "Kusursuz!" : "Tebrikler, çözdün!";
     } else {
-      b.innerHTML = "Bu sefer olmadı — gruplar açıkta.";
+      b.textContent = "Bu sefer olmadı — gruplar açıkta.";
     }
   }
 
@@ -1031,8 +991,8 @@ window.BaglantilarDepo = (function () {
     var metin = el("sonucMetin");
     if (oyun.durum === "kazandi") {
       metin.textContent = oyun.hata === 0
-        ? "Kusursuz! Hiç hata yapmadan çözdün. 🎉"
-        : (oyun.mod === "gunluk" ? "Bağlantılar #" + oyun.gunNo + " çözüldü! 🎉" : "Bulmacayı çözdün! 🎉");
+        ? "Kusursuz! Hiç hata yapmadan çözdün."
+        : "Bağlantılar #" + oyun.gunNo + " çözüldü!";
     } else {
       metin.textContent = "Bu sefer olmadı. Doğru gruplar yukarıda.";
     }
@@ -1057,35 +1017,23 @@ window.BaglantilarDepo = (function () {
     pay.addEventListener("click", paylas);
     butonlar.appendChild(pay);
 
-    if (oyun.mod === "alistirma") {
-      var yeni = document.createElement("button");
-      yeni.className = "dugme";
-      yeni.textContent = "Yeni oyun";
-      yeni.addEventListener("click", function () {
-        perdeKapat("perdeSonuc");
-        yeniOyun("alistirma"); ciz();
-      });
-      butonlar.appendChild(yeni);
-    } else {
-      var ist = document.createElement("button");
-      ist.className = "dugme";
-      ist.textContent = "İstatistikler";
-      ist.addEventListener("click", function () {
-        perdeKapat("perdeSonuc"); istatistikGoster(); perdeAc("perdeIst");
-      });
-      butonlar.appendChild(ist);
-    }
+    var ist = document.createElement("button");
+    ist.className = "dugme";
+    ist.textContent = "İstatistikler";
+    ist.addEventListener("click", function () {
+      perdeKapat("perdeSonuc"); istatistikGoster(); perdeAc("perdeIst");
+    });
+    butonlar.appendChild(ist);
     perdeAc("perdeSonuc");
   }
 
-  var EMOJI = { 1: "🟨", 2: "🟩", 3: "🟦", 4: "🟪" };
   function paylasMetni() {
-    var bas = oyun.mod === "gunluk" ? "Bağlantılar #" + oyun.gunNo : "Bağlantılar (alıştırma)";
+    var bas = "Bağlantılar #" + oyun.gunNo;
     var durum = oyun.durum === "kazandi"
       ? (oyun.hata === 0 ? " · kusursuz" : " · " + oyun.hata + " hata")
-      : " · ✖";
+      : " · bulunamadı";
     var satirlar = oyun.tahminler.map(function (satir) {
-      return satir.map(function (r) { return EMOJI[r]; }).join("");
+      return satir.join(" ");
     });
     return bas + durum + "\n" + satirlar.join("\n") + "\nbaglantilar.netlify.app";
   }
@@ -1166,17 +1114,6 @@ window.BaglantilarDepo = (function () {
   function perdeAc(id) { el(id).classList.add("acik"); }
   function perdeKapat(id) { el(id).classList.remove("acik"); }
 
-  // --- mod değişimi ---
-  function modSec(mod) {
-    el("modGunluk").setAttribute("aria-selected", mod === "gunluk");
-    el("modAlistirma").setAttribute("aria-selected", mod === "alistirma");
-    yeniOyun(mod);
-    ciz();
-    if (oyun.durum !== "oyunda" && oyun.mod === "gunluk") {
-      // günlük zaten bitmişse sonucu göstermeyi kullanıcıya bırak (bilgi satırı yeterli)
-    }
-  }
-
   // --- başlangıç ---
   function baglantilariKur() {
     el("btnYardim").addEventListener("click", function () { perdeAc("perdeYardim"); });
@@ -1187,9 +1124,6 @@ window.BaglantilarDepo = (function () {
     el("btnKaristir").addEventListener("click", karistirTiklandi);
     el("btnTemizle").addEventListener("click", temizleTiklandi);
     el("btnGonder").addEventListener("click", gonderTiklandi);
-
-    el("modGunluk").addEventListener("click", function () { modSec("gunluk"); });
-    el("modAlistirma").addEventListener("click", function () { modSec("alistirma"); });
 
     // modal kapatma
     document.querySelectorAll("[data-kapat]").forEach(function (b) {
@@ -1227,7 +1161,7 @@ window.BaglantilarDepo = (function () {
     });
 
     temaUygula();
-    yeniOyun("gunluk");
+    yeniOyun();
     ciz();
   }
 
