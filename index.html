@@ -790,7 +790,7 @@ window.BaglantilarDepo = (function () {
   }
 
   function gunlukKaydet() {
-    if (oyun.mod !== "gunluk") return;
+    if (oyun.mod !== "gunluk" || oyun.onizleme) return;
     Depo.gunlukKaydet(oyun.gunNo, {
       idx: oyun.idx,
       siralama: oyun.siralama.map(function (o) { return o.kelime; }),
@@ -1114,6 +1114,33 @@ window.BaglantilarDepo = (function () {
   function perdeAc(id) { el(id).classList.add("acik"); }
   function perdeKapat(id) { el(id).classList.remove("acik"); }
 
+  // --- önizleme yardımı (yalnızca artifact önizlemesinde etkin) ---
+  function onizlemeYeniBulmaca() {
+    var ridx = Math.floor(Math.random() * Veri.BULMACALAR.length);
+    oyun = {
+      mod: "gunluk", gunNo: bugunNo(), idx: ridx, onizleme: true,
+      siralama: karistir(kelimeListesiYap(Veri.BULMACALAR[ridx])),
+      secili: [], cozulen: [], tahminler: [], hata: 0, durum: "oyunda",
+      kaydedildi: true
+    };
+  }
+  function onizlemeKur() {
+    var btn = document.createElement("button");
+    btn.className = "dugme";
+    btn.textContent = "Baştan oyna";
+    btn.setAttribute("aria-label", "Yeni bulmacayla baştan oyna");
+    btn.style.cssText = "position:fixed;left:50%;bottom:1rem;transform:translateX(-50%);" +
+      "z-index:40;box-shadow:var(--golge);background:var(--panel);";
+    btn.addEventListener("click", function () {
+      document.querySelectorAll(".perde.acik").forEach(function (p) { p.classList.remove("acik"); });
+      onizlemeYeniBulmaca();
+      ciz();
+      window.scrollTo(0, 0);
+      toast("Yeni bulmaca");
+    });
+    document.body.appendChild(btn);
+  }
+
   // --- başlangıç ---
   function baglantilariKur() {
     el("btnYardim").addEventListener("click", function () { perdeAc("perdeYardim"); });
@@ -1163,6 +1190,8 @@ window.BaglantilarDepo = (function () {
     temaUygula();
     yeniOyun();
     ciz();
+
+    if (window.BAGLANTILAR_ONIZLEME) onizlemeKur();
   }
 
   if (document.readyState === "loading")
