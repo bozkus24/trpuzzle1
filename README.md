@@ -1,4 +1,4 @@
-# Bağlantılar — Türkçe grup bulmacası
+# Bağla — Türkçe grup bulmacası
 
 16 kelimeyi, ortak bir bağı olan **dört gizli gruba** ayırmaya çalıştığınız bir
 kelime oyunu. NYT *Connections*'ın Türkçe uyarlaması — ama bulmacalar Türkçeye
