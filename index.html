@@ -424,11 +424,10 @@ html[data-tema="koyu"] .dagilim .bar-ic { color: var(--secili-ink); }
 .yardim-tekrar input:checked::after {
   content: "";
   position: absolute;
-  left: 5.5px; top: 1.5px;
-  width: 5px; height: 10px;
-  border: solid var(--ink);     /* kutu beyaz kalır, yalnızca tik görünür */
-  border-width: 0 2.4px 2.4px 0;
-  transform: rotate(45deg);
+  inset: 0;
+  background-color: var(--ink);   /* kutu beyaz kalır, ortalanmış tik */
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20 6L9 17l-5-5' fill='none' stroke='%23000' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 68% no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M20 6L9 17l-5-5' fill='none' stroke='%23000' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 68% no-repeat;
 }
 .yardim-tekrar input:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 
