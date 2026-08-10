@@ -457,9 +457,7 @@ html[data-tema="koyu"] .dagilim .bar-ic { color: var(--secili-ink); }
       <div><div class="deger" id="istSeri">0</div><div class="ad">Güncel seri</div></div>
       <div><div class="deger" id="istEnUzun">0</div><div class="ad">En uzun</div></div>
     </div>
-    <h3>Hata dağılımı — kazanılan oyunlar</h3>
     <div class="dagilim" id="dagilim"></div>
-    <p class="soluk" style="margin-top:1rem" id="kusursuzMetin"></p>
     <div class="modal-alt">
       <button class="dugme" id="btnSifirla">İstatistikleri sıfırla</button>
     </div>
@@ -1003,7 +1001,6 @@ window.BaglantilarDepo = (function () {
         '<span class="bar-dis"><span class="bar-ic" style="width:' + Math.max(yuzde, 8) + '%">' + say + '</span></span>';
       d.appendChild(satir);
     }
-    el("kusursuzMetin").textContent = ist.kusursuz > 0 ? ("Kusursuz oyun: " + ist.kusursuz) : "";
   }
 
   // --- tema ---
