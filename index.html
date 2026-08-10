@@ -202,8 +202,9 @@ header { padding-top: .4rem; }
   padding: 3px;
   display: grid; place-items: center;
   text-align: center;
-  word-break: break-word;
   white-space: pre-line;
+  overflow-wrap: normal;
+  word-break: normal;
   line-height: 1.06;
   transition: background .12s, color .12s, transform .4s cubic-bezier(.2,.85,.25,1);
   user-select: none;
@@ -811,19 +812,28 @@ window.BaglantilarDepo = (function () {
     uygulaKutuFont();
   }
 
-  // Tahtadaki en uzun kelimeye göre TÜM kutulara aynı, sığabilen en büyük fontu ver.
+  // Tahtadaki en geniş kelimeyi canvas ile ölçüp TÜM kutulara aynı, tek satıra
+  // sığan en büyük fontu ver. Kelime asla bölünmez; kenara pay bırakılır.
   function uygulaKutuFont() {
     var kap = el("izgara");
     var kutu = kap.querySelector(".kutu");
     if (!kutu) return;
-    var enUzun = 0;
+    var cs = getComputedStyle(kutu);
+    var ctx = uygulaKutuFont._c || (uygulaKutuFont._c = document.createElement("canvas").getContext("2d"));
+    var R = 100;                                   // referans font boyutu
+    ctx.font = cs.fontWeight + " " + R + "px " + cs.fontFamily;
+    var enGenis = 0;
     kalanKelimeler().forEach(function (o) {
-      o.kelime.split(" ").forEach(function (t) { if (t.length > enUzun) enUzun = t.length; });
+      o.kelime.split(" ").forEach(function (t) {   // iki-kelime: her kelime ayrı satır
+        var w = ctx.measureText(t).width;
+        if (w > enGenis) enGenis = w;
+      });
     });
-    if (enUzun < 1) return;
-    var ic = kutu.clientWidth - 10;               // yatay iç genişlik (padding p-payı)
-    var px = ic / (enUzun * 0.66);                // büyük harf başına ~0.66em
-    px = Math.max(10.5, Math.min(px, 16.8));      // 10.5–16.8px arası
+    if (enGenis <= 0) return;
+    var kullanilabilir = kutu.clientWidth - 16;    // her yandan ~8px pay → çerçeveye değmez
+    var px = R * kullanilabilir / enGenis;
+    px = Math.min(px, 17);                          // kısa kelimelerde üst sınır
+    if (px < 7) px = 7;
     kap.style.setProperty("--kutu-font", px.toFixed(1) + "px");
   }
 
@@ -1203,6 +1213,7 @@ window.BaglantilarDepo = (function () {
     yeniOyun();
     ciz();
     window.addEventListener("resize", uygulaKutuFont);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(uygulaKutuFont);
 
     if (window.BAGLANTILAR_ONIZLEME) onizlemeKur();
   }
