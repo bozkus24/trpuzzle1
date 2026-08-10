@@ -802,7 +802,7 @@ window.BaglantilarDepo = (function () {
     kalan.forEach(function (o) {
       var btn = document.createElement("button");
       btn.className = "kutu";
-      btn.textContent = o.kelime.replace(/ /g, "\n");
+      btn.textContent = goruntuMetni(o.kelime);
       btn.setAttribute("data-kelime", o.kelime);
       if (oyun.secili.indexOf(o.kelime) !== -1) btn.classList.add("secili");
       if (oyun.durum !== "oyunda") btn.disabled = true;
@@ -812,8 +812,14 @@ window.BaglantilarDepo = (function () {
     uygulaKutuFont();
   }
 
-  // Tahtadaki en geniş kelimeyi canvas ile ölçüp TÜM kutulara aynı, tek satıra
-  // sığan en büyük fontu ver. Kelime asla bölünmez; kenara pay bırakılır.
+  // İki kelimelik cevap uzunsa (>9 hane) alt alta yazılır; kısa ise tek satırda kalır.
+  function goruntuMetni(kelime) {
+    return (kelime.length > 9 && kelime.indexOf(" ") !== -1)
+      ? kelime.replace(/ /g, "\n") : kelime;
+  }
+
+  // Tahtada ekranda görünecek en geniş satırı canvas ile ölçüp TÜM kutulara aynı,
+  // tek satıra sığan en büyük fontu ver. Kelime asla bölünmez; kenara pay bırakılır.
   function uygulaKutuFont() {
     var kap = el("izgara");
     var kutu = kap.querySelector(".kutu");
@@ -824,8 +830,8 @@ window.BaglantilarDepo = (function () {
     ctx.font = cs.fontWeight + " " + R + "px " + cs.fontFamily;
     var enGenis = 0;
     kalanKelimeler().forEach(function (o) {
-      o.kelime.split(" ").forEach(function (t) {   // iki-kelime: her kelime ayrı satır
-        var w = ctx.measureText(t).width;
+      goruntuMetni(o.kelime).split("\n").forEach(function (satir) {   // ekranda görünecek her satır
+        var w = ctx.measureText(satir).width;
         if (w > enGenis) enGenis = w;
       });
     });
