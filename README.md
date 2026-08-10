@@ -18,7 +18,10 @@ Renkler zorluğu gösterir: **sarı** (en kolay) → **yeşil** → **mavi** →
 
 ## Özellikler
 
-- **Günlük bulmaca:** herkese aynı, her gün yeni bulmaca.
+- **Günlük bulmaca:** herkese aynı, her gün yeni bulmaca (1 Ağustos 2026'dan
+  itibaren).
+- **Arşiv:** geçmiş günlük bulmacaları oynama; her günün ilerlemesi ayrı
+  saklanır (arşiv oyunları seriyi etkilemez).
 - **İstatistikler:** oynanan, kazanma yüzdesi, güncel/en uzun seri, kusursuz
   oyun sayısı ve hata dağılımı.
 - **Paylaşım:** sonucu, her tahmini zorluk numaralarıyla (1–4) gösteren bir
