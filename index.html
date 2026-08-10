@@ -195,7 +195,7 @@ header { padding-top: .4rem; }
   color: var(--ink);
   font-family: var(--sans);
   font-weight: 700;
-  font-size: clamp(.72rem, 3.4vw, 1.02rem);
+  font-size: var(--kutu-font, clamp(.72rem, 3.4vw, 1.02rem));
   text-transform: uppercase;
   letter-spacing: .006em;
   cursor: pointer;
@@ -203,11 +203,11 @@ header { padding-top: .4rem; }
   display: grid; place-items: center;
   text-align: center;
   word-break: break-word;
-  line-height: 1.04;
+  white-space: pre-line;
+  line-height: 1.06;
   transition: background .12s, color .12s, transform .4s cubic-bezier(.2,.85,.25,1);
   user-select: none;
 }
-.kutu.uzun { font-size: clamp(.58rem, 2.7vw, .82rem); }
 .kutu:hover { background: var(--tile-hover); }
 .kutu.secili { background: var(--secili); color: var(--secili-ink); }
 .kutu:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
@@ -800,14 +800,31 @@ window.BaglantilarDepo = (function () {
     kap.style.display = "grid";
     kalan.forEach(function (o) {
       var btn = document.createElement("button");
-      btn.className = "kutu" + (o.kelime.length > 8 ? " uzun" : "");
-      btn.textContent = o.kelime;
+      btn.className = "kutu";
+      btn.textContent = o.kelime.replace(/ /g, "\n");
       btn.setAttribute("data-kelime", o.kelime);
       if (oyun.secili.indexOf(o.kelime) !== -1) btn.classList.add("secili");
       if (oyun.durum !== "oyunda") btn.disabled = true;
       btn.addEventListener("click", function () { kutuTikla(o.kelime); });
       kap.appendChild(btn);
     });
+    uygulaKutuFont();
+  }
+
+  // Tahtadaki en uzun kelimeye göre TÜM kutulara aynı, sığabilen en büyük fontu ver.
+  function uygulaKutuFont() {
+    var kap = el("izgara");
+    var kutu = kap.querySelector(".kutu");
+    if (!kutu) return;
+    var enUzun = 0;
+    kalanKelimeler().forEach(function (o) {
+      o.kelime.split(" ").forEach(function (t) { if (t.length > enUzun) enUzun = t.length; });
+    });
+    if (enUzun < 1) return;
+    var ic = kutu.clientWidth - 10;               // yatay iç genişlik (padding p-payı)
+    var px = ic / (enUzun * 0.66);                // büyük harf başına ~0.66em
+    px = Math.max(10.5, Math.min(px, 16.8));      // 10.5–16.8px arası
+    kap.style.setProperty("--kutu-font", px.toFixed(1) + "px");
   }
 
   function cizHaklar() {
@@ -1185,6 +1202,7 @@ window.BaglantilarDepo = (function () {
     temaUygula();
     yeniOyun();
     ciz();
+    window.addEventListener("resize", uygulaKutuFont);
 
     if (window.BAGLANTILAR_ONIZLEME) onizlemeKur();
   }
