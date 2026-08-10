@@ -402,6 +402,18 @@ html[data-tema="koyu"] .dagilim .bar-ic { color: var(--secili-ink); }
 .modal-alt { display: flex; gap: .5rem; margin-top: 1.1rem; }
 .modal-alt .dugme { flex: 1; text-align: center; }
 
+.yardim-tekrar {
+  display: flex; align-items: center; gap: .5rem;
+  margin-top: 1.1rem;
+  font-size: .92rem; color: var(--ink-soluk);
+  cursor: pointer; user-select: none;
+}
+.yardim-tekrar input {
+  width: 18px; height: 18px;
+  accent-color: var(--ink);
+  cursor: pointer;
+}
+
 @media (max-width: 380px) { .uygulama { padding: 0 .8rem 2rem; } }
 @media (prefers-reduced-motion: reduce) {
   * { animation-duration: .001ms !important; transition-duration: .001ms !important; }
@@ -469,8 +481,12 @@ html[data-tema="koyu"] .dagilim .bar-ic { color: var(--secili-ink); }
     <p class="soluk">Renkler grubun zorluğunu gösterir: <b style="color:var(--s1)">sarı</b> en kolay, sonra <b style="color:var(--s2)">yeşil</b>, <b style="color:var(--s3)">mavi</b> ve <b style="color:var(--s4)">mor</b> (genelde bir kelime oyunu).</p>
     <h3>Dikkat</h3>
     <p>Bazı kelimeler birden çok gruba <b>uyar gibi görünür</b> — tuzak buradadır. Yalnızca <b>4 hata</b> hakkın var. Üç kelimen doğru grupta ise "Bir tanesi yanlış!" uyarısı gelir.</p>
+    <label class="yardim-tekrar" id="yardimTekrar">
+      <input type="checkbox" id="chkYardimGizle">
+      <span>Bir daha gösterme</span>
+    </label>
     <div class="modal-alt">
-      <button class="dugme birincil" data-kapat>Anladım</button>
+      <button class="dugme birincil" id="btnYardimAnladim">Anladım</button>
     </div>
   </div>
 </div>
@@ -1111,6 +1127,10 @@ window.BaglantilarDepo = (function () {
   }
   function perdeAc(id) { el(id).classList.add("acik"); }
   function perdeKapat(id) { el(id).classList.remove("acik"); }
+  function yardimAc() {
+    el("chkYardimGizle").checked = !!ayarlar.yardimGizle;
+    perdeAc("perdeYardim");
+  }
 
   // --- arşiv ---
   function gunDurumu(gn) {
@@ -1177,7 +1197,7 @@ window.BaglantilarDepo = (function () {
 
   // --- başlangıç ---
   function baglantilariKur() {
-    el("btnYardim").addEventListener("click", function () { perdeAc("perdeYardim"); });
+    el("btnYardim").addEventListener("click", yardimAc);
     el("btnIst").addEventListener("click", function () { istatistikGoster(); perdeAc("perdeIst"); });
     el("btnArsiv").addEventListener("click", function () { arsivGoster(); perdeAc("perdeArsiv"); });
     el("btnAyar").addEventListener("click", function () { perdeAc("perdeAyar"); });
@@ -1196,6 +1216,15 @@ window.BaglantilarDepo = (function () {
     });
     // "Nasıl oynanır" ekranı: herhangi bir yere dokununca kapanır.
     el("perdeYardim").addEventListener("click", function () { perdeKapat("perdeYardim"); });
+    // "Bir daha gösterme" kutucuğuna dokunmak kapatmasın (yoksa işaretlenemez).
+    el("yardimTekrar").addEventListener("click", function (e) { e.stopPropagation(); });
+    // Anladım: kutucuk işaretliyse tercihi kaydet, sonra kapat.
+    el("btnYardimAnladim").addEventListener("click", function (e) {
+      e.stopPropagation();
+      ayarlar.yardimGizle = el("chkYardimGizle").checked;
+      Depo.ayarKaydet(ayarlar);
+      perdeKapat("perdeYardim");
+    });
     document.addEventListener("keydown", function (e) {
       if (e.key === "Escape") document.querySelectorAll(".perde.acik").forEach(function (p) { p.classList.remove("acik"); });
       else if (e.key === "Enter" && !el("btnGonder").disabled) gonderTiklandi();
@@ -1225,8 +1254,8 @@ window.BaglantilarDepo = (function () {
 
     if (window.BAGLANTILAR_ONIZLEME) onizlemeKur();
 
-    // Oyun açılınca "Nasıl oynanır" pop-up'ı otomatik gelsin.
-    perdeAc("perdeYardim");
+    // Oyun açılınca "Nasıl oynanır" pop-up'ı otomatik gelsin (kullanıcı gizlemediyse).
+    if (!ayarlar.yardimGizle) yardimAc();
   }
 
   if (document.readyState === "loading")
