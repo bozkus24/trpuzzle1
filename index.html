@@ -1194,6 +1194,8 @@ window.BaglantilarDepo = (function () {
     document.querySelectorAll(".perde").forEach(function (p) {
       p.addEventListener("click", function (e) { if (e.target === p) p.classList.remove("acik"); });
     });
+    // "Nasıl oynanır" ekranı: herhangi bir yere dokununca kapanır.
+    el("perdeYardim").addEventListener("click", function () { perdeKapat("perdeYardim"); });
     document.addEventListener("keydown", function (e) {
       if (e.key === "Escape") document.querySelectorAll(".perde.acik").forEach(function (p) { p.classList.remove("acik"); });
       else if (e.key === "Enter" && !el("btnGonder").disabled) gonderTiklandi();
@@ -1222,6 +1224,9 @@ window.BaglantilarDepo = (function () {
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(uygulaKutuFont);
 
     if (window.BAGLANTILAR_ONIZLEME) onizlemeKur();
+
+    // Oyun açılınca "Nasıl oynanır" pop-up'ı otomatik gelsin.
+    perdeAc("perdeYardim");
   }
 
   if (document.readyState === "loading")
