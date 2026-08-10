@@ -409,10 +409,28 @@ html[data-tema="koyu"] .dagilim .bar-ic { color: var(--secili-ink); }
   cursor: pointer; user-select: none;
 }
 .yardim-tekrar input {
-  width: 18px; height: 18px;
-  accent-color: var(--ink);
+  appearance: none;
+  -webkit-appearance: none;
+  width: 20px; height: 20px;
+  flex-shrink: 0;
+  border: 2px solid var(--ink-soluk);
+  border-radius: 5px;
+  background: var(--zemin);      /* açık temada beyaz kutu */
   cursor: pointer;
+  position: relative;
+  transition: border-color .12s;
 }
+.yardim-tekrar input:checked { border-color: var(--ink); }
+.yardim-tekrar input:checked::after {
+  content: "";
+  position: absolute;
+  left: 5.5px; top: 1.5px;
+  width: 5px; height: 10px;
+  border: solid var(--ink);     /* kutu beyaz kalır, yalnızca tik görünür */
+  border-width: 0 2.4px 2.4px 0;
+  transform: rotate(45deg);
+}
+.yardim-tekrar input:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
 
 @media (max-width: 380px) { .uygulama { padding: 0 .8rem 2rem; } }
 @media (prefers-reduced-motion: reduce) {
