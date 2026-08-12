@@ -242,9 +242,10 @@ header { padding-top: .4rem; }
   width: 14px; height: 14px;
   border-radius: 50%;
   background: var(--secili);
-  transition: background .2s, transform .2s, box-shadow .2s;
 }
-.nokta.gitti { background: transparent; box-shadow: inset 0 0 0 2px var(--cizgi); transform: scale(.9); }
+/* Kaybedilen can yavaşça sönerek yok olur (geçiş yalnızca oyun içi hatada
+   JS ile açılır; sayfa açılış/geçişlerinde anlık uygulanır). */
+.nokta.gitti { opacity: 0; transform: scale(.35); }
 
 /* ---- Kontroller ---- */
 .kontroller {
@@ -889,11 +890,20 @@ window.BaglantilarDepo = (function () {
     kap.style.setProperty("--kutu-font", px.toFixed(1) + "px");
   }
 
-  function cizHaklar() {
+  function cizHaklar(animasyonlu) {
     var noktalar = el("noktalar").children;
     for (var i = 0; i < 4; i++) {
-      if (i >= 4 - oyun.hata) noktalar[i].classList.add("gitti");   // sağdan tükenir
-      else noktalar[i].classList.remove("gitti");
+      var gitmeli = (i >= 4 - oyun.hata);                 // sağdan tükenir
+      var n = noktalar[i];
+      var gitti = n.classList.contains("gitti");
+      if (gitmeli && !gitti) {
+        n.style.transition = animasyonlu
+          ? "opacity .6s ease, transform .6s ease" : "none";
+        n.classList.add("gitti");
+      } else if (!gitmeli && gitti) {
+        n.style.transition = "none";
+        n.classList.remove("gitti");
+      }
     }
     el("haklar").style.visibility = oyun.durum === "oyunda" ? "visible" : "hidden";
   }
@@ -1020,7 +1030,7 @@ window.BaglantilarDepo = (function () {
       if (enCok === 3) toast("Bir tanesi yanlış!");
       else toast("Yanlış grup");
       sallaSecili();
-      cizHaklar();
+      cizHaklar(true);
       if (oyun.hata >= 4) {
         for (var g = 0; g < 4; g++) if (oyun.cozulen.indexOf(g) === -1) oyun.cozulen.push(g);
         oyun.secili = [];
