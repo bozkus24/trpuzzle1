@@ -221,6 +221,12 @@ header { padding-top: .4rem; }
   30%, 50%, 70% { transform: translateX(-5px); }
   40%, 60% { transform: translateX(5px); }
 }
+.kutu.zipla { animation: zipla .32s cubic-bezier(.34,1.3,.5,1); }
+@keyframes zipla {
+  0% { transform: translateY(0); }
+  40% { transform: translateY(-13px); }
+  100% { transform: translateY(0); }
+}
 
 /* ---- Hak göstergesi ---- */
 .haklar {
@@ -745,7 +751,7 @@ window.BaglantilarDepo = (function () {
     oyun = {
       mod: "gunluk", gunNo: gn, idx: idx,
       siralama: karistir(kelimeListesiYap(Veri.BULMACALAR[idx]), rng),
-      secili: [], cozulen: [], tahminler: [], hata: 0, durum: "oyunda",
+      secili: [], cozulen: [], tahminler: [], gecmisTahminler: [], hata: 0, durum: "oyunda",
       kaydedildi: false
     };
   }
@@ -759,6 +765,7 @@ window.BaglantilarDepo = (function () {
       mod: mod, gunNo: gn, idx: idx,
       siralama: kayit.siralama.map(function (k) { return { kelime: k, grup: haritaGrup[k] }; }),
       secili: [], cozulen: kayit.cozulen.slice(), tahminler: kayit.tahminler.slice(),
+      gecmisTahminler: (kayit.gecmisTahminler || []).slice(),
       hata: kayit.hata, durum: kayit.durum, kaydedildi: kayit.kaydedildi
     };
   }
@@ -769,6 +776,7 @@ window.BaglantilarDepo = (function () {
       idx: oyun.idx,
       siralama: oyun.siralama.map(function (o) { return o.kelime; }),
       cozulen: oyun.cozulen, tahminler: oyun.tahminler,
+      gecmisTahminler: oyun.gecmisTahminler,
       hata: oyun.hata, durum: oyun.durum, kaydedildi: oyun.kaydedildi
     });
   }
@@ -884,7 +892,7 @@ window.BaglantilarDepo = (function () {
   function cizHaklar() {
     var noktalar = el("noktalar").children;
     for (var i = 0; i < 4; i++) {
-      if (i < oyun.hata) noktalar[i].classList.add("gitti");
+      if (i >= 4 - oyun.hata) noktalar[i].classList.add("gitti");   // sağdan tükenir
       else noktalar[i].classList.remove("gitti");
     }
     el("haklar").style.visibility = oyun.durum === "oyunda" ? "visible" : "hidden";
@@ -899,7 +907,7 @@ window.BaglantilarDepo = (function () {
 
   // --- etkileşim ---
   function kutuTikla(k) {
-    if (oyun.durum !== "oyunda") return;
+    if (oyun.durum !== "oyunda" || animKilit) return;
     var i = oyun.secili.indexOf(k);
     if (i !== -1) oyun.secili.splice(i, 1);
     else {
@@ -954,7 +962,47 @@ window.BaglantilarDepo = (function () {
     guncelleKontroller();
   }
 
+  var animKilit = false;
+
   function gonderTiklandi() {
+    if (oyun.durum !== "oyunda" || oyun.secili.length !== 4 || animKilit) return;
+
+    // Aynı 4'lü daha önce denendiyse izin verme (hak da gitmez).
+    var anahtar = oyun.secili.slice().sort().join("|");
+    if (oyun.gecmisTahminler.indexOf(anahtar) !== -1) {
+      toast("Bu dörtlüyü zaten denedin");
+      return;
+    }
+    oyun.gecmisTahminler.push(anahtar);
+
+    // Önce seçili kutular hafifçe zıplasın; bitince değerlendir.
+    animKilit = true;
+    ziplaSecili(function () {
+      animKilit = false;
+      degerlendir();
+    });
+  }
+
+  // Seçili kutuları sırayla (soldan sağa) hafifçe zıplatır.
+  function ziplaSecili(bitince) {
+    var kutular = Array.prototype.slice.call(
+      document.querySelectorAll("#izgara .kutu.secili"));
+    if (!kutular.length) { bitince(); return; }
+    kutular.forEach(function (k, i) {
+      setTimeout(function () {
+        k.classList.remove("zipla");
+        void k.offsetWidth;
+        k.classList.add("zipla");
+      }, i * 90);
+    });
+    var toplam = (kutular.length - 1) * 90 + 320;
+    setTimeout(function () {
+      kutular.forEach(function (k) { k.classList.remove("zipla"); });
+      bitince();
+    }, toplam);
+  }
+
+  function degerlendir() {
     if (oyun.durum !== "oyunda" || oyun.secili.length !== 4) return;
 
     var gruplar = oyun.secili.map(function (k) { return kelimeObj(k).grup; });
@@ -1198,7 +1246,7 @@ window.BaglantilarDepo = (function () {
     oyun = {
       mod: "gunluk", gunNo: bugunNo(), idx: ridx, onizleme: true,
       siralama: karistir(kelimeListesiYap(Veri.BULMACALAR[ridx])),
-      secili: [], cozulen: [], tahminler: [], hata: 0, durum: "oyunda",
+      secili: [], cozulen: [], tahminler: [], gecmisTahminler: [], hata: 0, durum: "oyunda",
       kaydedildi: true
     };
   }
