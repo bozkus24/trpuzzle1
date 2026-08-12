@@ -807,11 +807,13 @@ window.BaglantilarDepo = (function () {
   function cizBilgi() {
     var b = el("bilgiSatiri");
     if (oyun.durum === "oyunda") {
-      b.textContent = "Dört kelimelik dört grup oluştur.";
-    } else if (oyun.durum === "kazandi") {
-      b.textContent = oyun.hata === 0 ? "Kusursuz!" : "Tebrikler, çözdün!";
+      b.textContent = "";
+      b.style.display = "none";          // oynarken alt başlık yok (boşluk da kalmasın)
     } else {
-      b.textContent = "Bu sefer olmadı — gruplar açıkta.";
+      b.style.display = "";
+      b.textContent = oyun.durum === "kazandi"
+        ? (oyun.hata === 0 ? "Kusursuz!" : "Tebrikler, çözdün!")
+        : "Bu sefer olmadı — gruplar açıkta.";
     }
   }
 
