@@ -541,15 +541,14 @@ html[data-tema="koyu"] .dagilim .bar-ic { color: var(--secili-ink); }
     <div class="ayar-satir">
       <div>
         <div class="etiket">Tema</div>
-        <div class="aciklama">Açık, koyu ya da sistemi izle</div>
+        <div class="aciklama">Açık ya da koyu</div>
       </div>
       <select class="sec" id="secTema">
-        <option value="sistem">Sistem</option>
         <option value="acik">Açık</option>
         <option value="koyu">Koyu</option>
       </select>
     </div>
-    <p class="soluk" style="margin-top:.6rem">İlerlemen ve istatistiklerin yalnızca bu tarayıcıda saklanır.</p>
+    <p style="margin-top:.6rem;color:var(--ink)">İlerlemen ve istatistiklerin yalnızca bu tarayıcıda saklanır.</p>
   </div>
 </div>
 
@@ -1252,15 +1251,14 @@ window.BaglantilarDepo = (function () {
       else if (e.key === "Enter" && !el("btnGonder").disabled) gonderTiklandi();
     });
 
+    // Yalnızca açık/koyu; eski "sistem" tercihi açığa taşınır.
+    if (ayarlar.tema !== "acik" && ayarlar.tema !== "koyu") {
+      ayarlar.tema = "acik"; Depo.ayarKaydet(ayarlar); temaUygula();
+    }
     el("secTema").value = ayarlar.tema;
     el("secTema").addEventListener("change", function () {
       ayarlar.tema = this.value; Depo.ayarKaydet(ayarlar); temaUygula();
     });
-    if (window.matchMedia) {
-      window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", function () {
-        if (ayarlar.tema === "sistem") temaUygula();
-      });
-    }
 
     el("btnSifirla").addEventListener("click", function () {
       if (confirm("Tüm istatistikler silinsin mi?")) {
