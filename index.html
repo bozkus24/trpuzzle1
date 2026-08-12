@@ -1013,11 +1013,7 @@ window.BaglantilarDepo = (function () {
 
     var anahtarlar = Object.keys(sayim);
     if (anahtarlar.length === 1) {
-      var gi = parseInt(anahtarlar[0], 10);
-      oyun.cozulen.push(gi);
-      oyun.secili = [];
-      if (oyun.cozulen.length === 4) { bitir("kazandi"); }
-      else { gunlukKaydet(); ciz(); }
+      dogruAnimasyon(parseInt(anahtarlar[0], 10));
     } else {
       oyun.hata++;
       var enCok = Math.max.apply(null, Object.keys(sayim).map(function (k) { return sayim[k]; }));
@@ -1033,6 +1029,70 @@ window.BaglantilarDepo = (function () {
         gunlukKaydet();
       }
     }
+  }
+
+  // Doğru grup: seçili dörtlü önce en üst satıra dizilir (FLIP), sonra
+  // gruba (renkli başlık bandına) dönüşür — NYT tarzı.
+  function dogruAnimasyon(gi) {
+    animKilit = true;
+    var izg = el("izgara");
+    var azalt = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    // Eski konumları ölç (FLIP: First)
+    var ilk = {};
+    [].slice.call(izg.querySelectorAll(".kutu")).forEach(function (k) {
+      ilk[k.getAttribute("data-kelime")] = k.getBoundingClientRect();
+    });
+
+    // Sıralamayı yeniden diz: çözülenler önde, doğru dörtlü en üst satırda,
+    // kalan kutular altta.
+    var kalan = kalanKelimeler();
+    var cozulmus = oyun.siralama.filter(function (o) { return oyun.cozulen.indexOf(o.grup) !== -1; });
+    var dogru = kalan.filter(function (o) { return o.grup === gi; });
+    var oteki = kalan.filter(function (o) { return o.grup !== gi; });
+    oyun.siralama = cozulmus.concat(dogru, oteki);
+    cizIzgara();   // secili sınıfı oyun.secili'den yeniden uygulanır → koyu kalır
+
+    function bandaDonustur() {
+      oyun.cozulen.push(gi);
+      oyun.secili = [];
+      if (oyun.cozulen.length === 4) {
+        animKilit = false;
+        bitir("kazandi");
+      } else {
+        gunlukKaydet();
+        ciz();
+        animKilit = false;
+      }
+    }
+
+    if (azalt) { bandaDonustur(); return; }
+
+    // FLIP: Invert + Play (eski konumdan yeni konuma kaydır)
+    var hareketVar = false;
+    izg.querySelectorAll(".kutu").forEach(function (k) {
+      var o = ilk[k.getAttribute("data-kelime")];
+      if (!o) return;
+      var s = k.getBoundingClientRect();
+      var dx = o.left - s.left, dy = o.top - s.top;
+      if (!dx && !dy) return;
+      hareketVar = true;
+      k.style.transition = "none";
+      k.style.transform = "translate(" + dx + "px," + dy + "px)";
+      k.style.zIndex = "2";
+    });
+    requestAnimationFrame(function () {
+      izg.querySelectorAll(".kutu").forEach(function (k) {
+        if (k.style.transform) {
+          k.style.transition = "transform .5s cubic-bezier(.2,.85,.25,1)";
+          k.style.transform = "";
+          k.addEventListener("transitionend", function () { k.style.zIndex = ""; k.style.transition = ""; }, { once: true });
+        }
+      });
+    });
+
+    // Dizilme oturunca banda dönüştür.
+    setTimeout(bandaDonustur, hareketVar ? 620 : 200);
   }
 
   function sallaSecili() {
