@@ -457,7 +457,7 @@ html[data-tema="koyu"] .dagilim .bar-ic { color: var(--secili-ink); }
       <h1 class="bar-baslik">Bağla</h1>
       <div class="ust-butonlar">
         <button class="ikon" id="btnArsiv" title="Arşiv" aria-label="Arşiv"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="16" rx="2"/><line x1="3.5" y1="9.5" x2="20.5" y2="9.5"/><line x1="8" y1="3.2" x2="8" y2="6"/><line x1="16" y1="3.2" x2="16" y2="6"/></svg></button>
-        <button class="ikon" id="btnYardim" title="Nasıl oynanır?" aria-label="Nasıl oynanır"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.2a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1.1.9-1.1 1.8"/><circle cx="12" cy="16.6" r=".6" fill="currentColor" stroke="none"/></svg></button>
+        <button class="ikon" id="btnYardim" title="Nasıl oynanır" aria-label="Nasıl oynanır"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.2a2.5 2.5 0 1 1 3.5 2.3c-.8.4-1.1.9-1.1 1.8"/><circle cx="12" cy="16.6" r=".6" fill="currentColor" stroke="none"/></svg></button>
         <button class="ikon" id="btnIst" title="İstatistikler" aria-label="İstatistikler"><svg viewBox="0 0 24 24" width="19" height="19" fill="currentColor"><rect x="3.5" y="11" width="4" height="9"/><rect x="10" y="5" width="4" height="15"/><rect x="16.5" y="14" width="4" height="6"/></svg></button>
         <button class="ikon" id="btnAyar" title="Ayarlar" aria-label="Ayarlar"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><line x1="4" y1="8" x2="20" y2="8"/><line x1="4" y1="16" x2="20" y2="16"/><circle cx="9" cy="8" r="2.6" fill="var(--zemin)"/><circle cx="15" cy="16" r="2.6" fill="var(--zemin)"/></svg></button>
       </div>
@@ -497,7 +497,7 @@ html[data-tema="koyu"] .dagilim .bar-ic { color: var(--secili-ink); }
 <div class="perde" id="perdeYardim">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="yardimBaslik">
     <div class="modal-bas">
-      <h2 id="yardimBaslik">Nasıl oynanır?</h2>
+      <h2 id="yardimBaslik">Nasıl oynanır</h2>
       <button class="kapat" data-kapat aria-label="Kapat">×</button>
     </div>
     <p><b>16 kelimeyi</b>, ortak bir bağı olan <b>dört gruba</b> ayır. Her grupta tam <b>4 kelime</b> vardır.</p>
@@ -1370,16 +1370,13 @@ window.BaglantilarDepo = (function () {
         var perde = b.closest(".perde"); if (perde) perde.classList.remove("acik");
       });
     });
+    // Tüm perdeler (yardım dahil): yalnızca kart dışına — arka perdeye —
+    // dokununca kapanır. Kartın içine dokunmak kapatmaz.
     document.querySelectorAll(".perde").forEach(function (p) {
       p.addEventListener("click", function (e) { if (e.target === p) p.classList.remove("acik"); });
     });
-    // "Nasıl oynanır" ekranı: herhangi bir yere dokununca kapanır.
-    el("perdeYardim").addEventListener("click", function () { perdeKapat("perdeYardim"); });
-    // "Bir daha gösterme" kutucuğuna dokunmak kapatmasın (yoksa işaretlenemez).
-    el("yardimTekrar").addEventListener("click", function (e) { e.stopPropagation(); });
     // Anladım: kutucuk işaretliyse tercihi kaydet, sonra kapat.
-    el("btnYardimAnladim").addEventListener("click", function (e) {
-      e.stopPropagation();
+    el("btnYardimAnladim").addEventListener("click", function () {
       ayarlar.yardimGizle = el("chkYardimGizle").checked;
       Depo.ayarKaydet(ayarlar);
       perdeKapat("perdeYardim");
