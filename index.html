@@ -363,6 +363,10 @@ select.sec {
 }
 
 /* İstatistik */
+.ist-gun { margin: .2rem 0 1.2rem; }
+.ist-gun .durum { text-align: center; font-family: var(--serif); font-size: 1.12rem; font-weight: 700; margin: .1rem 0 0; }
+.ist-gun .not { text-align: center; color: var(--ink-soluk); font-size: .92rem; margin: .7rem 0 .2rem; }
+.ist-gun .pay-izgara { margin-bottom: .8rem; }
 .ist-kutular { display: grid; grid-template-columns: repeat(4, 1fr); gap: .5rem; text-align: center; margin: .3rem 0 1.1rem; }
 .ist-kutular .deger { font-size: 1.7rem; font-weight: 800; font-variant-numeric: tabular-nums; }
 .ist-kutular .ad { font-size: .64rem; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-soluk); margin-top: 3px; }
@@ -540,6 +544,9 @@ html[data-tema="koyu"] .dagilim .bar-ic { color: var(--secili-ink); }
       <h2 id="istBaslik">İstatistikler</h2>
       <button class="kapat" data-kapat aria-label="Kapat">×</button>
     </div>
+    <!-- Günün sonucu (JS ile doldurulur) -->
+    <div id="istGun" class="ist-gun"></div>
+    <h3>Genel istatistikler</h3>
     <div class="ist-kutular">
       <div><div class="deger" id="istOynanan">0</div><div class="ad">Oynanan</div></div>
       <div><div class="deger" id="istYuzde">0</div><div class="ad">Kazanma %</div></div>
@@ -1247,7 +1254,63 @@ window.BaglantilarDepo = (function () {
   }
 
   // --- istatistik ekranı ---
+  // Üstte "günün sonucu": durum + tahmin ızgarası + paylaş butonu.
+  function istGunKur() {
+    var gun = el("istGun");
+    gun.innerHTML = "";
+    var bitti = (oyun.durum === "kazandi" || oyun.durum === "kaybetti");
+    var oynandi = oyun.tahminler.length > 0;
+
+    var h = document.createElement("h3");
+    h.style.marginTop = "0";
+    h.textContent = "Günün sonucu";
+    gun.appendChild(h);
+
+    var durum = document.createElement("p");
+    durum.className = "durum";
+    var etiket = "Bağla #" + oyun.gunNo;
+    if (oyun.durum === "kazandi") {
+      durum.textContent = etiket + " · " + (oyun.hata === 0 ? "Kusursuz" : oyun.hata + " hata");
+    } else if (oyun.durum === "kaybetti") {
+      durum.textContent = etiket + " · Bulunamadı";
+    } else {
+      durum.textContent = etiket + " · Devam ediyor";
+    }
+    gun.appendChild(durum);
+
+    if (oynandi) {
+      var pg = document.createElement("div");
+      pg.className = "pay-izgara";
+      oyun.tahminler.forEach(function (satir) {
+        satir.forEach(function (renk) {
+          var s = document.createElement("span");
+          s.className = "p" + renk;
+          pg.appendChild(s);
+        });
+      });
+      gun.appendChild(pg);
+    } else {
+      var not = document.createElement("p");
+      not.className = "not";
+      not.textContent = "Henüz tahmin yapmadın.";
+      gun.appendChild(not);
+    }
+
+    // Paylaş: yalnızca bulmaca tamamlandığında (paylaşacak bir sonuç varsa).
+    if (bitti) {
+      var alt = document.createElement("div");
+      alt.className = "modal-alt";
+      var pay = document.createElement("button");
+      pay.className = "dugme birincil";
+      pay.textContent = "Sonucu paylaş";
+      pay.addEventListener("click", paylas);
+      alt.appendChild(pay);
+      gun.appendChild(alt);
+    }
+  }
+
   function istatistikGoster() {
+    istGunKur();
     var ist = Depo.istatistik();
     el("istOynanan").textContent = ist.oynanan;
     el("istYuzde").textContent = ist.oynanan ? Math.round(ist.kazanilan / ist.oynanan * 100) : 0;
