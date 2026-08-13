@@ -347,6 +347,11 @@ footer a:hover { color: var(--ink); text-decoration: underline; }
   background: var(--s1); color: var(--grup-ink);
 }
 
+/* Zorluk lejantı: renk isimleri yerine renk örnekleri */
+.zorluk { list-style: none; padding: 0; margin: .5rem 0 .2rem; display: grid; gap: .45rem; }
+.zorluk li { display: flex; align-items: center; gap: .6rem; font-size: .95rem; color: var(--ink); }
+.zorluk .renk { width: 17px; height: 17px; border-radius: 5px; flex-shrink: 0; }
+
 /* Ayar satırı */
 .ayar-satir { display: flex; align-items: center; justify-content: space-between; padding: .7rem 0; gap: 1rem; }
 .ayar-satir .etiket { font-size: 1rem; font-weight: 600; }
@@ -500,14 +505,21 @@ html[data-tema="koyu"] .dagilim .bar-ic { color: var(--secili-ink); }
       <h2 id="yardimBaslik">Nasıl oynanır</h2>
       <button class="kapat" data-kapat aria-label="Kapat">×</button>
     </div>
-    <p><b>16 kelimeyi</b>, ortak bir bağı olan <b>dört gruba</b> ayır. Her grupta tam <b>4 kelime</b> vardır.</p>
-    <p>Dört kelime seç ve <b>Onayla</b>'ya bas. Doğruysa grup açılır ve rengiyle üste yerleşir.</p>
+    <p><b>16 kelime</b> içinden, ortak bağları olan kelimeleri <b>dörtlü</b> gruplandır.</p>
+    <p>Dört kelime seç ve <b>Onayla</b> butonuna bas. Doğruysa kelimeler en üste gelir ve <b>renkli bir grup</b> açılır.</p>
     <div class="ornek">
       <span>ELMA</span><span>ARMUT</span><span>ERİK</span><span>NAR</span>
     </div>
-    <p class="soluk">Renkler grubun zorluğunu gösterir: <b style="color:var(--s1)">sarı</b> en kolay, sonra <b style="color:var(--s2)">yeşil</b>, <b style="color:var(--s3)">mavi</b> ve <b style="color:var(--s4)">mor</b> (genelde bir kelime oyunu).</p>
+    <p class="soluk">Renkler grubun zorluğunu gösterir:</p>
+    <ul class="zorluk">
+      <li><span class="renk" style="background:var(--s1)"></span> Kolay</li>
+      <li><span class="renk" style="background:var(--s2)"></span> Orta</li>
+      <li><span class="renk" style="background:var(--s3)"></span> Zor</li>
+      <li><span class="renk" style="background:var(--s4)"></span> Çok zor</li>
+    </ul>
     <h3>Dikkat</h3>
-    <p>Bazı kelimeler birden çok gruba <b>uyar gibi görünür</b> — tuzak buradadır. Yalnızca <b>4 hata</b> hakkın var. Üç kelimen doğru grupta ise "Bir tanesi yanlış!" uyarısı gelir.</p>
+    <p>Bazı kelimeler birçok gruba uyuyor gibi görünür ama bunlardan bazıları tuzaktır.</p>
+    <p>Yalnızca <b>4 hata</b> hakkın var. Üç kelimen doğru gruptaysa <b>"Bir tanesi yanlış!"</b> uyarısı alırsın.</p>
     <label class="yardim-tekrar" id="yardimTekrar">
       <span class="kutucuk">
         <input type="checkbox" id="chkYardimGizle">
