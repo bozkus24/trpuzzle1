@@ -162,8 +162,10 @@ header { padding-top: .4rem; }
   align-items: center; justify-content: center; gap: 2px;
   text-align: center;
   color: var(--grup-ink);
-  animation: bandAc .4s ease;
 }
+/* Yalnızca yeni bulunan grup bandı açılış animasyonu oynatır;
+   önceki bandlar tekrar yanıp sönmez. */
+.band.yeni { animation: bandAc .4s ease; }
 .band.s1 { background: var(--s1); }
 .band.s2 { background: var(--s2); }
 .band.s3 { background: var(--s3); }
@@ -828,14 +830,29 @@ window.BaglantilarDepo = (function () {
 
   function cizCozulen() {
     var kap = el("cozulen");
-    kap.innerHTML = "";
+    // Mevcut bandları grup indeksine göre eşle (yeniden kurma yok → tekrar yanıp sönme yok).
+    var mevcut = {};
+    [].slice.call(kap.children).forEach(function (b) {
+      var gi = b.getAttribute("data-grup");
+      if (gi !== null) mevcut[gi] = b;
+    });
+    // Artık çözülü olmayanları kaldır (yeni oyun / sıfırlama).
+    Object.keys(mevcut).forEach(function (gi) {
+      if (oyun.cozulen.indexOf(parseInt(gi, 10)) === -1) {
+        kap.removeChild(mevcut[gi]); delete mevcut[gi];
+      }
+    });
+    // Çözülenleri sırayla yerleştir; yalnızca yeni olan animasyonla girer.
     oyun.cozulen.forEach(function (gi) {
+      if (mevcut[gi]) { kap.appendChild(mevcut[gi]); return; }   // varsa yeniden oluşturma
       var g = grupBilgi(gi);
       var band = document.createElement("div");
-      band.className = "band s" + (gi + 1);
+      band.className = "band yeni s" + (gi + 1);
+      band.setAttribute("data-grup", gi);
       band.innerHTML =
         '<div class="tema">' + g.tema + '</div>' +
         '<div class="kelimeler">' + g.kelimeler.join(", ") + '</div>';
+      band.addEventListener("animationend", function () { band.classList.remove("yeni"); }, { once: true });
       kap.appendChild(band);
     });
   }
@@ -1094,7 +1111,7 @@ window.BaglantilarDepo = (function () {
     requestAnimationFrame(function () {
       izg.querySelectorAll(".kutu").forEach(function (k) {
         if (k.style.transform) {
-          k.style.transition = "transform .5s cubic-bezier(.2,.85,.25,1)";
+          k.style.transition = "transform .72s cubic-bezier(.2,.8,.2,1)";
           k.style.transform = "";
           k.addEventListener("transitionend", function () { k.style.zIndex = ""; k.style.transition = ""; }, { once: true });
         }
@@ -1102,7 +1119,7 @@ window.BaglantilarDepo = (function () {
     });
 
     // Dizilme oturunca banda dönüştür.
-    setTimeout(bandaDonustur, hareketVar ? 620 : 200);
+    setTimeout(bandaDonustur, hareketVar ? 860 : 220);
   }
 
   function sallaSecili() {
