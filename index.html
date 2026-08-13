@@ -862,7 +862,8 @@ window.BaglantilarDepo = (function () {
       band.className = "band yeni s" + (gi + 1);
       band.setAttribute("data-grup", gi);
       band.innerHTML =
-        '<div class="tema">' + g.tema + '</div>' +
+        // Türkçe yerelde büyüt: "i" → "İ" (CSS uppercase yerelsiz kalınca noktayı kaybediyor).
+        '<div class="tema">' + g.tema.toLocaleUpperCase("tr-TR") + '</div>' +
         '<div class="kelimeler">' + g.kelimeler.join(", ") + '</div>';
       band.addEventListener("animationend", function () { band.classList.remove("yeni"); }, { once: true });
       kap.appendChild(band);
