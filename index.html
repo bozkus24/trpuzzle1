@@ -1432,6 +1432,9 @@ window.BaglantilarDepo = (function () {
 
   // --- başlangıç ---
   function baglantilariKur() {
+    // Türkçe büyük harf (i → İ): CSS text-transform yerele bağlıdır; önizlemede
+    // <html lang="tr"> sarmalayıcısı düşerse burada garanti altına alınır.
+    document.documentElement.setAttribute("lang", "tr");
     el("btnYardim").addEventListener("click", function () { yardimAc(false); });
     el("btnIst").addEventListener("click", function () { istatistikGoster(); perdeAc("perdeIst"); });
     el("btnArsiv").addEventListener("click", function () { arsivGoster(); perdeAc("perdeArsiv"); });
