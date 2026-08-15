@@ -334,6 +334,10 @@ footer a:hover { color: var(--ink); text-decoration: underline; }
 .modal-bas h2 { margin: 0; font-family: var(--serif); font-weight: 700; font-size: 1.4rem; }
 .kapat { border: none; background: transparent; color: var(--ink-soluk); font-size: 1.5rem; cursor: pointer; line-height: 1; padding: 0 .2rem; }
 .kapat:hover { color: var(--ink); }
+/* "Nasıl Oynanır": başlık ortada, kapatma çarpısı köşeye yakın */
+#perdeYardim .modal-bas { justify-content: center; position: relative; }
+#perdeYardim .modal-bas h2 { text-align: center; }
+#perdeYardim .kapat { position: absolute; top: -.55rem; right: -.5rem; padding: .3rem .45rem; }
 .modal p { font-size: .96rem; line-height: 1.55; color: var(--ink); }
 .modal p.soluk { color: var(--ink-soluk); }
 .modal h3 { font-size: .82rem; letter-spacing: .04em; text-transform: uppercase; color: var(--ink-soluk); margin: 1.2rem 0 .4rem; }
