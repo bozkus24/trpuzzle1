@@ -377,6 +377,20 @@ select.sec {
   border: 1px solid var(--cizgi); border-radius: 8px;
   padding: .45rem .7rem; font-family: var(--sans); font-size: .9rem; cursor: pointer;
 }
+/* Aç/Kapa anahtarı (toggle) */
+.anahtar {
+  position: relative; flex-shrink: 0; width: 46px; height: 26px; padding: 0;
+  border: 1px solid var(--cizgi); border-radius: 999px; background: var(--tile);
+  cursor: pointer; transition: background .2s ease, border-color .2s ease;
+}
+.anahtar .top {
+  position: absolute; top: 2px; left: 2px; width: 20px; height: 20px;
+  border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3);
+  transition: transform .2s ease;
+}
+.anahtar[aria-checked="true"] { background: var(--secili); border-color: var(--secili); }
+.anahtar[aria-checked="true"] .top { transform: translateX(20px); }
+.anahtar:focus-visible { outline: 2px solid var(--secili); outline-offset: 2px; }
 
 /* İstatistik */
 .ist-gun { margin: .2rem 0 1.2rem; }
@@ -596,12 +610,10 @@ html[data-tema="koyu"] .dagilim .bar-ic { color: var(--secili-ink); }
     <div class="ayar-satir">
       <div>
         <div class="etiket">Renk körü modu</div>
-        <div class="aciklama">Ayırt edilebilir renkler; karelerde ve gruplarda zorluk numarası</div>
       </div>
-      <select class="sec" id="secRenkKoru">
-        <option value="kapali">Kapalı</option>
-        <option value="acik">Açık</option>
-      </select>
+      <button type="button" class="anahtar" id="btnRenkKoru" role="switch" aria-checked="false" aria-label="Renk körü modu">
+        <span class="top"></span>
+      </button>
     </div>
     <p style="margin-top:.6rem;color:var(--ink)">İlerlemen ve istatistiklerin yalnızca bu tarayıcıda saklanır.</p>
   </div>
@@ -1510,9 +1522,11 @@ window.BaglantilarDepo = (function () {
       ayarlar.tema = this.value; Depo.ayarKaydet(ayarlar); temaUygula();
     });
 
-    el("secRenkKoru").value = ayarlar.renkKoru ? "acik" : "kapali";
-    el("secRenkKoru").addEventListener("change", function () {
-      ayarlar.renkKoru = (this.value === "acik"); Depo.ayarKaydet(ayarlar); renkKoruUygula();
+    el("btnRenkKoru").setAttribute("aria-checked", ayarlar.renkKoru ? "true" : "false");
+    el("btnRenkKoru").addEventListener("click", function () {
+      ayarlar.renkKoru = !ayarlar.renkKoru;
+      this.setAttribute("aria-checked", ayarlar.renkKoru ? "true" : "false");
+      Depo.ayarKaydet(ayarlar); renkKoruUygula();
     });
 
     el("btnSifirla").addEventListener("click", function () {
