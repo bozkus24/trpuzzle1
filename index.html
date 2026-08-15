@@ -70,6 +70,18 @@ html[data-tema="koyu"] {
   --golge: 0 14px 34px rgba(0, 0, 0, .55);
 }
 
+/* Renk körü modu: daha ayırt edilebilir palet + kare/grup üzerinde zorluk numarası */
+html[data-rk="acik"] { --s1: #f0e442; --s2: #e69f00; --s3: #56b4e9; --s4: #cc79a7; }
+html[data-rk="acik"] .pay-izgara span {
+  display: grid; place-items: center; font-size: .6rem; font-weight: 800; color: rgba(18, 18, 18, .62);
+}
+html[data-rk="acik"] .pay-izgara span::after { content: attr(data-n); }
+html[data-rk="acik"] .band { position: relative; }
+html[data-rk="acik"] .band::before {
+  content: attr(data-no); position: absolute; top: 7px; left: 10px;
+  font-size: .74rem; font-weight: 800; color: var(--grup-ink); opacity: .6;
+}
+
 * { box-sizing: border-box; }
 html, body { margin: 0; }
 
@@ -581,6 +593,16 @@ html[data-tema="koyu"] .dagilim .bar-ic { color: var(--secili-ink); }
         <option value="koyu">Koyu</option>
       </select>
     </div>
+    <div class="ayar-satir">
+      <div>
+        <div class="etiket">Renk körü modu</div>
+        <div class="aciklama">Ayırt edilebilir renkler; karelerde ve gruplarda zorluk numarası</div>
+      </div>
+      <select class="sec" id="secRenkKoru">
+        <option value="kapali">Kapalı</option>
+        <option value="acik">Açık</option>
+      </select>
+    </div>
     <p style="margin-top:.6rem;color:var(--ink)">İlerlemen ve istatistiklerin yalnızca bu tarayıcıda saklanır.</p>
   </div>
 </div>
@@ -835,7 +857,9 @@ window.BaglantilarDepo = (function () {
     return d.getUTCDate() + " " + AYLAR[d.getUTCMonth()] + " " + d.getUTCFullYear();
   }
   function cizDateline() {
-    el("dateline").textContent = tarihMetni(oyun.gunNo) + " · #" + oyun.gunNo;
+    // Bugünün günlüğü ise "Günün bulmacası", geçmiş bir gün oynanıyorsa "Arşiv".
+    var etiket = (oyun.gunNo === bugunNo()) ? "Günün bulmacası" : "Arşiv";
+    el("dateline").textContent = etiket + " · " + tarihMetni(oyun.gunNo);
   }
 
   function cizBilgi() {
@@ -872,6 +896,7 @@ window.BaglantilarDepo = (function () {
       var band = document.createElement("div");
       band.className = "band yeni s" + (gi + 1);
       band.setAttribute("data-grup", gi);
+      band.setAttribute("data-no", gi + 1);   // renk körü modunda görünen zorluk numarası
       band.innerHTML =
         // Türkçe yerelde büyüt: "i" → "İ" (CSS uppercase yerelsiz kalınca noktayı kaybediyor).
         '<div class="tema">' + g.tema.toLocaleUpperCase("tr-TR") + '</div>' +
@@ -1204,6 +1229,7 @@ window.BaglantilarDepo = (function () {
       satir.forEach(function (renk) {
         var s = document.createElement("span");
         s.className = "p" + renk;
+        s.setAttribute("data-n", renk);   // renk körü modunda kare içindeki numara
         pg.appendChild(s);
       });
     });
@@ -1289,6 +1315,7 @@ window.BaglantilarDepo = (function () {
         satir.forEach(function (renk) {
           var s = document.createElement("span");
           s.className = "p" + renk;
+          s.setAttribute("data-n", renk);
           pg.appendChild(s);
         });
       });
@@ -1351,6 +1378,11 @@ window.BaglantilarDepo = (function () {
     var meta = document.querySelector('meta[name="theme-color"]');
     if (meta) meta.setAttribute("content",
       kok.getAttribute("data-tema") === "koyu" ? "#121213" : "#ffffff");
+  }
+
+  function renkKoruUygula() {
+    if (ayarlar.renkKoru) document.documentElement.setAttribute("data-rk", "acik");
+    else document.documentElement.removeAttribute("data-rk");
   }
 
   // --- toast / modal ---
@@ -1478,6 +1510,11 @@ window.BaglantilarDepo = (function () {
       ayarlar.tema = this.value; Depo.ayarKaydet(ayarlar); temaUygula();
     });
 
+    el("secRenkKoru").value = ayarlar.renkKoru ? "acik" : "kapali";
+    el("secRenkKoru").addEventListener("change", function () {
+      ayarlar.renkKoru = (this.value === "acik"); Depo.ayarKaydet(ayarlar); renkKoruUygula();
+    });
+
     el("btnSifirla").addEventListener("click", function () {
       if (confirm("Tüm istatistikler silinsin mi?")) {
         Depo.istSifirla(); istatistikGoster(); toast("İstatistikler sıfırlandı");
@@ -1485,6 +1522,7 @@ window.BaglantilarDepo = (function () {
     });
 
     temaUygula();
+    renkKoruUygula();
     yeniOyun();
     ciz();
     window.addEventListener("resize", uygulaKutuFont);
