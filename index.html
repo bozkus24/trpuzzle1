@@ -869,8 +869,8 @@ window.BaglantilarDepo = (function () {
     return d.getUTCDate() + " " + AYLAR[d.getUTCMonth()] + " " + d.getUTCFullYear();
   }
   function cizDateline() {
-    // Bugünün günlüğü ise "Günün bulmacası", geçmiş bir gün oynanıyorsa "Arşiv".
-    var etiket = (oyun.gunNo === bugunNo()) ? "Günün bulmacası" : "Arşiv";
+    // Bugünün günlüğü ise "Günün Bulmacası", geçmiş bir gün oynanıyorsa "Arşiv".
+    var etiket = (oyun.gunNo === bugunNo()) ? "Günün Bulmacası" : "Arşiv";
     el("dateline").textContent = etiket + " · " + tarihMetni(oyun.gunNo);
   }
 
