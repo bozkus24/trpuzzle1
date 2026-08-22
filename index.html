@@ -1280,22 +1280,43 @@ window.BaglantilarDepo = (function () {
   }
   function paylas() {
     var metin = paylasMetni();
+    // Önce panoya kopyala: bu, tıklama (user gesture) İÇİNDE çalışmalı ki
+    // tarayıcı engellemesin. Kopyalama her cihazda çalışır.
+    panoyaKopyala(metin);
+    // Cihaz destekliyorsa ayrıca yerel paylaşım penceresini de aç.
     if (navigator.share) {
-      navigator.share({ text: metin }).catch(function () { panoyaKopyala(metin); });
-    } else {
-      panoyaKopyala(metin);
+      try { navigator.share({ text: metin }).catch(function () {}); } catch (e) {}
     }
   }
   function panoyaKopyala(metin) {
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(metin).then(function () { toast("Panoya kopyalandı"); },
-        function () { toast("Kopyalanamadı"); });
+      navigator.clipboard.writeText(metin).then(
+        function () { toast("Panoya kopyalandı"); },
+        function () { yedekKopyala(metin); }   // izin/reddedilirse yedeğe düş
+      );
     } else {
+      yedekKopyala(metin);
+    }
+  }
+  function yedekKopyala(metin) {
+    try {
       var ta = document.createElement("textarea");
-      ta.value = metin; document.body.appendChild(ta); ta.select();
-      try { document.execCommand("copy"); toast("Panoya kopyalandı"); }
-      catch (e) { toast("Kopyalanamadı"); }
+      ta.value = metin;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.top = "0";
+      ta.style.left = "0";
+      ta.style.opacity = "0";
+      ta.style.fontSize = "16px";   // iOS'ta otomatik yakınlaşmayı önle
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      try { ta.setSelectionRange(0, metin.length); } catch (e) {}
+      var ok = document.execCommand("copy");
       document.body.removeChild(ta);
+      toast(ok ? "Panoya kopyalandı" : "Kopyalanamadı");
+    } catch (e) {
+      toast("Kopyalanamadı");
     }
   }
 
