@@ -1269,14 +1269,14 @@ window.BaglantilarDepo = (function () {
   }
 
   function paylasMetni() {
-    // Başlık: "Bağla #<gün> <x>/4"  —  x = 4 - yapılan hata sayısı.
-    var bas = "Bağla #" + oyun.gunNo + " " + (4 - oyun.hata) + "/4";
+    // Başlık iki satır: "Bağla #<gün>" ve altında "<hata> hata" (yapılan hata sayısı).
+    var bas = "Bağla #" + oyun.gunNo + "\n" + oyun.hata + " hata";
     // Grup numarası (grup+1) → renk karesi: 1 sarı, 2 yeşil, 3 mavi, 4 mor.
     var EMOJI = { 1: "🟨", 2: "🟩", 3: "🟦", 4: "🟪" };
     var satirlar = oyun.tahminler.map(function (satir) {
       return satir.map(function (renk) { return EMOJI[renk]; }).join("");
     });
-    return bas + "\n\n" + satirlar.join("\n") + "\ntrpuzzle.com/bagla";
+    return bas + "\n" + satirlar.join("\n") + "\ntrpuzzle.com/bagla";
   }
   function paylas() {
     var metin = paylasMetni();
