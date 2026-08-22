@@ -1269,14 +1269,14 @@ window.BaglantilarDepo = (function () {
   }
 
   function paylasMetni() {
-    var bas = "Bağla #" + oyun.gunNo;
-    var durum = oyun.durum === "kazandi"
-      ? (oyun.hata === 0 ? " · kusursuz" : " · " + oyun.hata + " hata")
-      : " · bulunamadı";
+    // Başlık: "Bağla #<gün> <x>/4"  —  x = 4 - yapılan hata sayısı.
+    var bas = "Bağla #" + oyun.gunNo + " " + (4 - oyun.hata) + "/4";
+    // Grup numarası (grup+1) → renk karesi: 1 sarı, 2 yeşil, 3 mavi, 4 mor.
+    var EMOJI = { 1: "🟨", 2: "🟩", 3: "🟦", 4: "🟪" };
     var satirlar = oyun.tahminler.map(function (satir) {
-      return satir.join(" ");
+      return satir.map(function (renk) { return EMOJI[renk]; }).join("");
     });
-    return bas + durum + "\n" + satirlar.join("\n") + "\ntrpuzzle.com/bagla";
+    return bas + "\n\n" + satirlar.join("\n") + "\ntrpuzzle.com/bagla";
   }
   function paylas() {
     var metin = paylasMetni();
