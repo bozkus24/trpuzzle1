@@ -533,12 +533,6 @@ html[data-tema="koyu"] .dagilim .bar-ic { color: var(--secili-ink); }
     <button class="dugme" id="btnTemizle" disabled>Seçimi temizle</button>
     <button class="dugme birincil" id="btnGonder" disabled>Onayla</button>
   </div>
-
-  <footer>
-    <a href="gizlilik.html">Gizlilik</a>
-    <span>·</span>
-    <a href="kosullar.html">Koşullar</a>
-  </footer>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -1276,33 +1270,54 @@ window.BaglantilarDepo = (function () {
   }
 
   function paylasMetni() {
-    var bas = "Bağla #" + oyun.gunNo;
-    var durum = oyun.durum === "kazandi"
-      ? (oyun.hata === 0 ? " · kusursuz" : " · " + oyun.hata + " hata")
-      : " · bulunamadı";
+    // Başlık iki satır: "Bağla #<gün>" ve altında "<hata> hata" (yapılan hata sayısı).
+    var bas = "Bağla #" + oyun.gunNo + "\n" + oyun.hata + " hata";
+    // Grup numarası (grup+1) → renk karesi: 1 sarı, 2 yeşil, 3 mavi, 4 mor.
+    var EMOJI = { 1: "🟨", 2: "🟩", 3: "🟦", 4: "🟪" };
     var satirlar = oyun.tahminler.map(function (satir) {
-      return satir.join(" ");
+      return satir.map(function (renk) { return EMOJI[renk]; }).join("");
     });
-    return bas + durum + "\n" + satirlar.join("\n") + "\ntrpuzzle.com/bagla";
+    return bas + "\n" + satirlar.join("\n") + "\ntrpuzzle.com/bagla";
   }
   function paylas() {
     var metin = paylasMetni();
+    // Önce panoya kopyala: bu, tıklama (user gesture) İÇİNDE çalışmalı ki
+    // tarayıcı engellemesin. Kopyalama her cihazda çalışır.
+    panoyaKopyala(metin);
+    // Cihaz destekliyorsa ayrıca yerel paylaşım penceresini de aç.
     if (navigator.share) {
-      navigator.share({ text: metin }).catch(function () { panoyaKopyala(metin); });
-    } else {
-      panoyaKopyala(metin);
+      try { navigator.share({ text: metin }).catch(function () {}); } catch (e) {}
     }
   }
   function panoyaKopyala(metin) {
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(metin).then(function () { toast("Panoya kopyalandı"); },
-        function () { toast("Kopyalanamadı"); });
+      navigator.clipboard.writeText(metin).then(
+        function () { toast("Panoya kopyalandı"); },
+        function () { yedekKopyala(metin); }   // izin/reddedilirse yedeğe düş
+      );
     } else {
+      yedekKopyala(metin);
+    }
+  }
+  function yedekKopyala(metin) {
+    try {
       var ta = document.createElement("textarea");
-      ta.value = metin; document.body.appendChild(ta); ta.select();
-      try { document.execCommand("copy"); toast("Panoya kopyalandı"); }
-      catch (e) { toast("Kopyalanamadı"); }
+      ta.value = metin;
+      ta.setAttribute("readonly", "");
+      ta.style.position = "fixed";
+      ta.style.top = "0";
+      ta.style.left = "0";
+      ta.style.opacity = "0";
+      ta.style.fontSize = "16px";   // iOS'ta otomatik yakınlaşmayı önle
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      try { ta.setSelectionRange(0, metin.length); } catch (e) {}
+      var ok = document.execCommand("copy");
       document.body.removeChild(ta);
+      toast(ok ? "Panoya kopyalandı" : "Kopyalanamadı");
+    } catch (e) {
+      toast("Kopyalanamadı");
     }
   }
 
