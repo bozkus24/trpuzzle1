@@ -516,9 +516,6 @@ html[data-tema="koyu"] .dagilim .bar-ic { color: var(--secili-ink); }
         <button class="ikon" id="btnAyar" title="Ayarlar" aria-label="Ayarlar"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><line x1="4" y1="8" x2="20" y2="8"/><line x1="4" y1="16" x2="20" y2="16"/><circle cx="9" cy="8" r="2.6" fill="var(--zemin)"/><circle cx="15" cy="16" r="2.6" fill="var(--zemin)"/></svg></button>
       </div>
     </div>
-    <div class="masthead">
-      <div class="tarih" id="dateline"></div>
-    </div>
   </header>
 
   <div class="bilgi-satiri" id="bilgiSatiri"></div>
@@ -859,7 +856,6 @@ window.BaglantilarDepo = (function () {
 
   // --- render ---
   function ciz() {
-    cizDateline();
     cizBilgi();
     cizCozulen();
     cizIzgara();
@@ -874,12 +870,6 @@ window.BaglantilarDepo = (function () {
     var d = gunTarihi(gn);
     return d.getUTCDate() + " " + AYLAR[d.getUTCMonth()] + " " + d.getUTCFullYear();
   }
-  function cizDateline() {
-    // Bugünün günlüğü ise "Günün Bulmacası", geçmiş bir gün oynanıyorsa "Arşiv".
-    var etiket = (oyun.gunNo === bugunNo()) ? "Günün Bulmacası" : "Arşiv";
-    el("dateline").textContent = etiket + " · " + tarihMetni(oyun.gunNo);
-  }
-
   function cizBilgi() {
     var b = el("bilgiSatiri");
     if (oyun.durum === "oyunda") {
