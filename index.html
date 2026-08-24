@@ -593,9 +593,6 @@ html[data-tema="koyu"] .dagilim .bar-ic { color: var(--secili-ink); }
       <div><div class="deger" id="istEnUzun">0</div><div class="ad">En uzun</div></div>
     </div>
     <div class="dagilim" id="dagilim"></div>
-    <div class="modal-alt">
-      <button class="dugme" id="btnSifirla">İstatistikleri sıfırla</button>
-    </div>
   </div>
 </div>
 
@@ -1557,12 +1554,6 @@ window.BaglantilarDepo = (function () {
       ayarlar.renkKoru = !ayarlar.renkKoru;
       this.setAttribute("aria-checked", ayarlar.renkKoru ? "true" : "false");
       Depo.ayarKaydet(ayarlar); renkKoruUygula();
-    });
-
-    el("btnSifirla").addEventListener("click", function () {
-      if (confirm("Tüm istatistikler silinsin mi?")) {
-        Depo.istSifirla(); istatistikGoster(); toast("İstatistikler sıfırlandı");
-      }
     });
 
     temaUygula();
