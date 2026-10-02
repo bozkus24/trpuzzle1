@@ -1,6 +1,29 @@
 <!DOCTYPE html>
 <html lang="tr" data-tema="acik">
 <head>
+<script src="/assets/game-remote.js"></script>
+<!-- game-security-start -->
+<script>
+/* Kayıtlar güvenilir girdi değildir. Eski geçerli kayıtları koruyarak türleri doğrula. */
+(function () {
+  'use strict';
+  const object = value => value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+  const count = value => Number.isSafeInteger(value) && value >= 0 ? value : 0;
+  const escape = value => String(value == null ? '' : value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  function stats(value, fields, buckets, distribution = 'dist') {
+    const result = {...object(value)};
+    fields.forEach(key => result[key] = count(result[key]));
+    if (buckets) {
+      const source = object(result[distribution]);
+      result[distribution] = Object.fromEntries(buckets.map(key => [key, count(source[key])]));
+    }
+    return result;
+  }
+  window.TrPuzzleSecurity = Object.freeze({object, count, escape, stats});
+})();
+</script>
+<!-- game-security-end -->
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Bağla - TrPuzzle</title>
@@ -611,6 +634,8 @@ html.tp-splash-acik{background:#fff}
 
 </script>
 <!-- game-clock-end -->
+<style>#tpPlay:not([data-progress-ready]){visibility:hidden}</style>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7993571496408496" crossorigin="anonymous"></script>
 </head>
 <body>
 <div id="tp-splash">
@@ -834,6 +859,107 @@ c0 -41 -6 -73 -15 -88 -19 -28 -100 -82 -139 -92 l-29 -7 7 -83 c8 -101 3
             <h1 class="tp-name">Bağla</h1>
     <p class="tp-tag">On altı kelimeyi dört gizli grupta bağla.</p>
     <button type="button" class="tp-play" id="tpPlay">Oyna</button>
+<!-- TRPUZZLE-PROGRESS-START -->
+<script>
+/* Üretilen dosya: trpuzzlemain/tools/sync_splash_progress.py */
+(function () {
+  "use strict";
+  function readProgress(key) {
+    try {
+      const value = JSON.parse(localStorage.getItem(key));
+      return value && typeof value === "object" && !Array.isArray(value) ? value : {};
+    } catch (e) { return {}; }
+  }
+
+  function hasGuesses(value) {
+    return Array.isArray(value) && value.length > 0;
+  }
+
+  function dailyProgress(now, selectedLevel) {
+    const tr = new Date(now.getTime() + 3 * 60 * 60 * 1000);
+    const year = tr.getUTCFullYear(), month = tr.getUTCMonth(), day = tr.getUTCDate();
+    const date = year + "-" + String(month + 1).padStart(2, "0") + "-" + String(day).padStart(2, "0");
+    const dayId = Math.floor(Date.UTC(year, month, day) / 86400000);
+    const puzzleNo = dayId - Date.UTC(2026, 9, 3) / 86400000 + 1;
+    const midnight = Date.UTC(year, month, day);
+    const foxNo = Math.floor((midnight - Date.UTC(2026, 7, 1)) / 86400000) + 1;
+    const aralaDay = Math.round((midnight - Date.UTC(2026, 0, 1)) / 86400000);
+
+    const harfle = readProgress("trw-" + date);
+    const settings = readProgress("word500tr.ayarlar");
+    if (selectedLevel) settings.seviye = selectedLevel;
+    const level = ["kolay", "standart", "zor"].includes(settings.seviye) ? settings.seviye : "standart";
+    // Harf500 açılışta son seçilen seviyeyi yükler.
+    const harf500 = readProgress("word500tr.oyun." + level + "." + date);
+    const baklava = readProgress("petek-progress-v1")[dayId] || {};
+    const tilkile = readProgress("foximax-daily-" + foxNo);
+    const bagla = puzzleNo >= 1 ? readProgress("baglantilar.2026-10-03.gunluk." + puzzleNo) : {};
+    const sehirle = readProgress("iller-globle:daily:" + date);
+    const oldArala = readProgress("aradle_day_v1");
+    const arala = readProgress("aradle_days_v2")[aralaDay] ||
+      (oldArala.day === aralaDay ? oldArala : {});
+
+    const started = {
+      Harfle: hasGuesses(harfle.guesses) && !harfle.done && !harfle.win,
+      Harf500: harf500.surum === 1 && hasGuesses(harf500.gecmis) && !harf500.bitti && !harf500.kazandi,
+      Baklava: baklava.phase === "play" && typeof baklava.swapsLeft === "number" &&
+        baklava.swapsLeft > 0 && baklava.swapsLeft < 15,
+      Arala: typeof arala.steps === "number" && arala.steps > 0 && !arala.done && !arala.lost && !arala.g,
+      Tilkile: tilkile.status === "playing" && hasGuesses(tilkile.guessed),
+      // Kesme tek hamlede biter; kaydedilmiş, yarım kalmış bir turu yoktur.
+      Kesme: false,
+      "Bağla": bagla.durum === "oyunda" && hasGuesses(bagla.tahminler),
+      "Şehirle": hasGuesses(sehirle.guesses) && !sehirle.won && !sehirle.gaveUp
+    };
+    // Tüm günlük kayıtlar Türkiye tarihini kullanır; Kesme tek hamlede biter.
+    const kesme = readProgress("kesme2-day-" + date);
+    const aralaResult = readProgress("aradle_result_v1")[aralaDay];
+    const completed = {
+      Harfle: harfle.done === true || harfle.win === true,
+      Harf500: harf500.surum === 1 && (harf500.bitti === true || harf500.kazandi === true),
+      Baklava: baklava.phase === "win" || baklava.phase === "lose",
+      Arala: arala.done === true || arala.lost === true || arala.g === true ||
+        (typeof aralaResult === "number" && (aralaResult === -1 || (aralaResult >= 1 && aralaResult <= 5))),
+      Tilkile: tilkile.status === "won" || tilkile.status === "lost",
+      Kesme: Array.isArray(kesme.cut) && kesme.cut.length === 4,
+      "Bağla": bagla.durum === "kazandi" || bagla.durum === "kaybetti",
+      "Şehirle": sehirle.won === true || sehirle.gaveUp === true
+    };
+    const states = {};
+    Object.keys(started).forEach(function (game) {
+      states[game] = completed[game] ? "completed" : started[game] ? "started" : "new";
+    });
+    return states;
+  }
+
+
+  window.TrPuzzleProgress = dailyProgress;
+  function refresh() {
+    const button = document.getElementById("tpPlay");
+    const title = document.querySelector("#tp-splash .tp-name");
+    if (!button || !title) return;
+    const selected = document.querySelector('#tpSeg [data-seviye][aria-checked="true"]');
+    const state = dailyProgress(new Date(), selected && selected.getAttribute("data-seviye"))[title.textContent.trim()];
+    button.textContent = state === "completed" ? "Sonucu Gör" : state === "started" ? "Devam Et" : "Oyna";
+    button.setAttribute("data-progress-ready", "");
+  }
+  refresh();
+  document.addEventListener("DOMContentLoaded", refresh);
+  window.addEventListener("pageshow", refresh);
+  window.addEventListener("storage", refresh);
+  window.addEventListener("focus", refresh);
+  document.addEventListener("visibilitychange", function () { if (!document.hidden) refresh(); });
+  const segment = document.getElementById("tpSeg");
+  if (segment) {
+    segment.addEventListener("click", refresh);
+    segment.addEventListener("keydown", refresh);
+  }
+  setInterval(function () { if (!document.hidden) refresh(); }, 60000);
+
+})();
+</script>
+<!-- TRPUZZLE-PROGRESS-END -->
+
     <div class="tp-meta">
       <span id="tpDate"></span><br>
       <span id="tpNo"></span>
@@ -994,81 +1120,14 @@ c0 -41 -6 -73 -15 -88 -19 -28 -100 -82 -139 -92 l-29 -7 7 -83 c8 -101 3
 
 <!-- ================= VERİ ================= -->
 <script>
-window.BaglantilarVeri = {
-  // Günlük bulmaca bu tarihten itibaren sayılır (1. gün).
-  BASLANGIC: Date.UTC(2026, 7, 1), // 1 Ağustos 2026
-
-  // Her bulmaca: gruplar kolaydan zora (sarı→yeşil→mavi→mor) sıralıdır.
-  BULMACALAR: [
-    { gruplar: [
-      { tema: "Deniz canlıları", kelimeler: ["AHTAPOT", "MİDYE", "YENGEÇ", "KARİDES"] },
-      { tema: "Sıcak içecekler",  kelimeler: ["ÇAY", "KAHVE", "SALEP", "KAKAO"] },
-      { tema: "İstanbul semtleri", kelimeler: ["KADIKÖY", "BEŞİKTAŞ", "ÜSKÜDAR", "BEYOĞLU"] },
-      { tema: "İçinde 'kar' saklı", kelimeler: ["KARTAL", "KARANFİL", "KARINCA", "KARDEŞ"] }
-    ] },
-    { gruplar: [
-      { tema: "Meyveler", kelimeler: ["ÇİLEK", "KAYISI", "İNCİR", "KİRAZ"] },
-      { tema: "Renkler",  kelimeler: ["TURUNCU", "LACİVERT", "EFLATUN", "BORDO"] },
-      { tema: "'___ suyu'", kelimeler: ["MADEN", "PORTAKAL", "VİŞNE", "ŞALGAM"] },
-      { tema: "Aynı zamanda kadın ismi", kelimeler: ["DERYA", "EBRU", "NİSAN", "YAĞMUR"] }
-    ] },
-    { gruplar: [
-      { tema: "Do-re-mi notaları", kelimeler: ["FA", "SOL", "LA", "Sİ"] },
-      { tema: "Konum bildiren",    kelimeler: ["SAĞ", "ALT", "ÜST", "ÖN"] },
-      { tema: "Meyveler",          kelimeler: ["ARMUT", "ELMA", "ERİK", "NAR"] },
-      { tema: "Çalgılar",          kelimeler: ["DAVUL", "KEMAN", "FLÜT", "GİTAR"] }
-    ] },
-    { gruplar: [
-      { tema: "Çiçekler",   kelimeler: ["LALE", "MENEKŞE", "PAPATYA", "SÜMBÜL"] },
-      { tema: "Gezegenler", kelimeler: ["MARS", "VENÜS", "JÜPİTER", "SATÜRN"] },
-      { tema: "Baklagiller", kelimeler: ["NOHUT", "MERCİMEK", "FASULYE", "BEZELYE"] },
-      { tema: "Burçlar",    kelimeler: ["KOÇ", "BOĞA", "YENGEÇ", "TERAZİ"] }
-    ] },
-    { gruplar: [
-      { tema: "Spor dalları", kelimeler: ["GÜREŞ", "BOKS", "TENİS", "YÜZME"] },
-      { tema: "Nehirler",     kelimeler: ["DİCLE", "FIRAT", "MERİÇ", "ARAS"] },
-      { tema: "Aynı zamanda sayı", kelimeler: ["YÜZ", "BİN", "KIRK", "ELLİ"] },
-      { tema: "İçinde renk gizli", kelimeler: ["SARIMSAK", "KARABİBER", "ALBAY", "GÖKDELEN"] }
-    ] },
-    { gruplar: [
-      { tema: "Kış ile ilgili", kelimeler: ["KIZAK", "ELDİVEN", "KARTOPU", "KAYAK"] },
-      { tema: "Kahvaltılıklar", kelimeler: ["ZEYTİN", "PEYNİR", "BAL", "TEREYAĞI"] },
-      { tema: "Şehirler",       kelimeler: ["ANKARA", "İZMİR", "BURSA", "ADANA"] },
-      { tema: "Dağlar",         kelimeler: ["AĞRI", "ERCİYES", "ULUDAĞ", "KAÇKAR"] }
-    ] },
-    { gruplar: [
-      { tema: "Müzik türleri", kelimeler: ["ROCK", "CAZ", "POP", "RAP"] },
-      { tema: "Ağaçlar",       kelimeler: ["ÇINAR", "MEŞE", "KAVAK", "ÇAM"] },
-      { tema: "Ege tatil beldeleri", kelimeler: ["ÇEŞME", "MARMARİS", "FETHİYE", "DATÇA"] },
-      { tema: "Evin bölümleri", kelimeler: ["SALON", "MUTFAK", "BODRUM", "BALKON"] }
-    ] },
-    { gruplar: [
-      { tema: "Sebzeler", kelimeler: ["PATLICAN", "KABAK", "DOMATES", "ISPANAK"] },
-      { tema: "Şerbetli tatlılar", kelimeler: ["BAKLAVA", "KÜNEFE", "REVANİ", "KADAYIF"] },
-      { tema: "Aynı zamanda balık", kelimeler: ["KILIÇ", "DİL", "PALAMUT", "LEVREK"] },
-      { tema: "'GÖZ' ile başlayan", kelimeler: ["GÖZLÜK", "GÖZYAŞI", "GÖZALTI", "GÖZDE"] }
-    ] },
-    { gruplar: [
-      { tema: "Gökyüzü", kelimeler: ["YILDIZ", "GEZEGEN", "GALAKSİ", "NEBULA"] },
-      { tema: "Futbol terimleri", kelimeler: ["PENALTI", "KORNER", "FAUL", "OFSAYT"] },
-      { tema: "Ünlemler", kelimeler: ["OF", "VAY", "AMAN", "EYVAH"] },
-      { tema: "İçinde 'ay' gizli", kelimeler: ["AYNA", "AYRAN", "MAYDANOZ", "SARAY"] }
-    ] },
-    { gruplar: [
-      { tema: "Giysiler", kelimeler: ["GÖMLEK", "ETEK", "CEKET", "PANTOLON"] },
-      { tema: "Türkiye'yi çevreleyen denizler", kelimeler: ["KARADENİZ", "AKDENİZ", "EGE", "MARMARA"] },
-      { tema: "Meyveler", kelimeler: ["MUZ", "KİVİ", "HURMA", "AYVA"] },
-      { tema: "İçinde 'el' gizli", kelimeler: ["ELMA", "ELBİSE", "TEMEL", "GÜZEL"] }
-    ] }
-  ]
-};
+window.BaglantilarVeri = {BASLANGIC:Date.UTC(2026,9,3),BULMACALAR:{length:16}};
 </script>
 
 <!-- ================= DEPO ================= -->
 <script>
 window.BaglantilarDepo = (function () {
   var AYAR = "baglantilar.ayarlar";
-  var IST  = "baglantilar.istatistik";
+  var IST  = "baglantilar.2026-10-03.istatistik";
 
   function oku(k, v) {
     try { var s = localStorage.getItem(k); return s ? JSON.parse(s) : v; }
@@ -1083,17 +1142,17 @@ window.BaglantilarDepo = (function () {
     ayarKaydet: function (a) { yaz(AYAR, a); },
 
     istatistik: function () {
-      return oku(IST, {
+      return TrPuzzleSecurity.stats(oku(IST, {
         oynanan: 0, kazanilan: 0, seri: 0, enUzun: 0, kusursuz: 0,
         dagilim: { 0: 0, 1: 0, 2: 0, 3: 0, 4: 0 },
         sonGun: 0, sonKazanan: 0
-      });
+      }), ["oynanan","kazanilan","seri","enUzun","kusursuz","sonGun","sonKazanan"], [0,1,2,3,4], "dagilim");
     },
     istKaydet: function (i) { yaz(IST, i); },
     istSifirla: function () { try { localStorage.removeItem(IST); } catch (e) {} },
 
-    gunluk: function (gunNo) { return oku("baglantilar.gunluk." + gunNo, null); },
-    gunlukKaydet: function (gunNo, d) { yaz("baglantilar.gunluk." + gunNo, d); }
+    gunluk: function (gunNo) { return oku("baglantilar.2026-10-03.gunluk." + gunNo, null); },
+    gunlukKaydet: function (gunNo, d) { yaz("baglantilar.2026-10-03.gunluk." + gunNo, d); }
   };
 })();
 </script>
@@ -1146,40 +1205,32 @@ window.BaglantilarDepo = (function () {
     return liste;
   }
 
-  function gunuKur(gn) {
-    var n = Veri.BULMACALAR.length;
-    var idx = ((gn - 1) % n + n) % n;
-    var kayit = Depo.gunluk(gn);
-    if (kayit && kayit.idx === idx) {
-      oyun = kayittanKur(kayit, "gunluk", gn, idx);
-      return;
+  var remoteSession=null,remoteRequest=0,remoteGroups={};
+  async function gunuKur(gn){
+    var request=++remoteRequest;
+    if(!Number.isInteger(gn)||gn<1||gn>Veri.BULMACALAR.length||gn>bugunNo()){
+      oyun={mod:'bekliyor',gunNo:gn,idx:-1,durum:'bekliyor',siralama:[],secili:[],cozulen:[],tahminler:[],gecmisTahminler:[],hata:0};return;
     }
-    var rng = mulberry32(gn * 2654435761);
-    oyun = {
-      mod: "gunluk", gunNo: gn, idx: idx,
-      siralama: karistir(kelimeListesiYap(Veri.BULMACALAR[idx]), rng),
-      secili: [], cozulen: [], tahminler: [], gecmisTahminler: [], hata: 0, durum: "oyunda",
-      kaydedildi: false
-    };
+    animKilit=true;
+    var kayit=Depo.gunluk(gn),date=new Date(Veri.BASLANGIC+(gn-1)*864e5).toISOString().slice(0,10),options={date,mode:gn===bugunNo()?'daily':'archive'};
+    if(kayit&&kayit.token)options.token=kayit.token;
+    try{
+      var session=await TrPuzzleRemote.open('bagla',options);if(request!==remoteRequest)return;
+      remoteSession=session;var v=session.view;
+      remoteGroups=Object.fromEntries(v.revealed.map(g=>[g.id,g]));
+      var words=kayit&&Array.isArray(kayit.siralama)&&kayit.siralama.length===16&&new Set(kayit.siralama).size===16&&kayit.siralama.every(w=>v.words.includes(w))?kayit.siralama:v.words;
+      oyun={mod:'gunluk',gunNo:gn,idx:gn-1,siralama:words.map(k=>({kelime:k,grup:remoteGroupOf(k)})),secili:[],cozulen:v.done?[0,1,2,3]:v.solved,tahminler:v.colors||v.history.map(()=>[1,1,1,1]),gecmisTahminler:v.history,hata:v.errors,durum:v.done?(v.win?'kazandi':'kaybetti'):'oyunda',kaydedildi:!!(kayit&&kayit.kaydedildi)};
+      gunlukKaydet();
+    }catch(e){toast(e.message);if(!oyun)oyun={mod:'bekliyor',gunNo:gn,idx:-1,durum:'bekliyor',siralama:[],secili:[],cozulen:[],tahminler:[],gecmisTahminler:[],hata:0};}
+    finally{if(request===remoteRequest)animKilit=false;}
   }
-  function yeniOyun() { gunuKur(bugunNo()); }
-
-  function kayittanKur(kayit, mod, gn, idx) {
-    var tam = kelimeListesiYap(Veri.BULMACALAR[idx]);
-    var haritaGrup = {};
-    tam.forEach(function (o) { haritaGrup[o.kelime] = o.grup; });
-    return {
-      mod: mod, gunNo: gn, idx: idx,
-      siralama: kayit.siralama.map(function (k) { return { kelime: k, grup: haritaGrup[k] }; }),
-      secili: [], cozulen: kayit.cozulen.slice(), tahminler: kayit.tahminler.slice(),
-      gecmisTahminler: (kayit.gecmisTahminler || []).slice(),
-      hata: kayit.hata, durum: kayit.durum, kaydedildi: kayit.kaydedildi
-    };
-  }
+  function remoteGroupOf(word){var g=Object.values(remoteGroups).find(g=>g.kelimeler.includes(word));return g?g.id:-1;}
+  function yeniOyun(){return gunuKur(bugunNo());}
 
   function gunlukKaydet() {
     if (oyun.mod !== "gunluk" || oyun.onizleme) return;
     Depo.gunlukKaydet(oyun.gunNo, {
+      token:remoteSession&&remoteSession.token,
       idx: oyun.idx,
       siralama: oyun.siralama.map(function (o) { return o.kelime; }),
       cozulen: oyun.cozulen, tahminler: oyun.tahminler,
@@ -1188,7 +1239,7 @@ window.BaglantilarDepo = (function () {
     });
   }
 
-  function grupBilgi(gi) { return Veri.BULMACALAR[oyun.idx].gruplar[gi]; }
+  function grupBilgi(gi) { return remoteGroups[gi]; }
   function kelimeObj(k) {
     for (var i = 0; i < oyun.siralama.length; i++)
       if (oyun.siralama[i].kelime === k) return oyun.siralama[i];
@@ -1200,6 +1251,19 @@ window.BaglantilarDepo = (function () {
 
   // --- render ---
   function ciz() {
+    var bekliyor = oyun.durum === "bekliyor";
+    [el("izgara"), el("cozulen"), el("haklar"), el("btnGonder").parentElement].forEach(function (node) {
+      node.style.display = bekliyor ? "none" : "";
+    });
+    if (bekliyor) {
+      el("dateline").textContent = "";
+      el("bilgiSatiri").style.display = "block";
+      el("bilgiSatiri").textContent = bugunNo() < 1
+        ? "İlk Bağla bulmacası 3 Ekim 2026'da açılıyor."
+        : "Yeni bulmaca hazırlanıyor. Bu sırada arşivdeki bulmacaları çözebilirsin.";
+      el("btnGonder").disabled = true;
+      return;
+    }
     cizDateline();
     cizBilgi();
     cizCozulen();
@@ -1415,7 +1479,7 @@ window.BaglantilarDepo = (function () {
       toast("Bu dörtlüyü zaten denedin");
       return;
     }
-    oyun.gecmisTahminler.push(anahtar);
+
 
     // Önce seçili kutular hafifçe zıplasın; bitince değerlendir.
     animKilit = true;
@@ -1444,33 +1508,18 @@ window.BaglantilarDepo = (function () {
     }, toplam);
   }
 
-  function degerlendir() {
-    if (oyun.durum !== "oyunda" || oyun.secili.length !== 4) return;
-
-    var gruplar = oyun.secili.map(function (k) { return kelimeObj(k).grup; });
-    var sayim = {};
-    gruplar.forEach(function (g) { sayim[g] = (sayim[g] || 0) + 1; });
-
-    oyun.tahminler.push(oyun.secili.map(function (k) { return kelimeObj(k).grup + 1; }));
-
-    var anahtarlar = Object.keys(sayim);
-    if (anahtarlar.length === 1) {
-      dogruAnimasyon(parseInt(anahtarlar[0], 10));
-    } else {
-      oyun.hata++;
-      var enCok = Math.max.apply(null, Object.keys(sayim).map(function (k) { return sayim[k]; }));
-      if (enCok === 3) toast("Bir tanesi yanlış!");
-      else toast("Yanlış grup");
-      sallaSecili();
-      cizHaklar(true);
-      if (oyun.hata >= 4) {
-        for (var g = 0; g < 4; g++) if (oyun.cozulen.indexOf(g) === -1) oyun.cozulen.push(g);
-        oyun.secili = [];
-        bitir("kaybetti");
-      } else {
-        gunlukKaydet();
-      }
-    }
+  async function degerlendir(){
+    if(oyun.durum!=='oyunda'||oyun.secili.length!==4||animKilit)return;
+    var request=remoteRequest,session=remoteSession;animKilit=true;
+    try{
+      var v=await TrPuzzleRemote.move(session,oyun.secili.slice());if(request!==remoteRequest)return;
+      remoteGroups=Object.fromEntries(v.revealed.map(g=>[g.id,g]));
+      oyun.siralama.forEach(o=>o.grup=remoteGroupOf(o.kelime));
+      oyun.gecmisTahminler=v.history;oyun.tahminler=v.colors||v.history.map(()=>[1,1,1,1]);oyun.hata=v.errors;
+      if(v.last.matched>=0){dogruAnimasyon(v.last.matched);return;}
+      animKilit=false;toast(v.last.oneAway?'Bir tanesi yanlış!':'Yanlış grup');sallaSecili();cizHaklar(true);
+      if(v.done){oyun.cozulen=[0,1,2,3];oyun.secili=[];bitir('kaybetti');}else gunlukKaydet();
+    }catch(e){if(request===remoteRequest){animKilit=false;toast(e.message);}}
   }
 
   // Doğru grup: seçili dörtlü önce en üst satıra dizilir (FLIP), sonra
@@ -1604,7 +1653,7 @@ window.BaglantilarDepo = (function () {
     panoyaKopyala(metin);
     // Cihaz destekliyorsa ayrıca yerel paylaşım penceresini de aç.
     if (navigator.share) {
-      try { navigator.share({ title: "Bağla", text: metin }).catch(function () {}); } catch (e) {}
+      try { navigator.share({text: metin }).catch(function () {}); } catch (e) {}
     }
   }
   function panoyaKopyala(metin) {
@@ -1654,6 +1703,11 @@ window.BaglantilarDepo = (function () {
 
     var durum = document.createElement("p");
     durum.className = "durum";
+    if (oyun.durum === "bekliyor") {
+      durum.textContent = bugunNo() < 1 ? "İlk bulmaca 3 Ekim 2026’da." : "Bugün için yeni bulmaca hazırlanıyor.";
+      gun.appendChild(durum);
+      return;
+    }
     var etiket = "Bağla #" + oyun.gunNo;
     if (oyun.durum === "kazandi") {
       durum.textContent = etiket + " · " + (oyun.hata === 0 ? "Kusursuz" : oyun.hata + " hata");
@@ -1775,7 +1829,8 @@ window.BaglantilarDepo = (function () {
     var liste = el("arsivListe");
     liste.innerHTML = "";
     var etiket = { kazandi: "çözüldü", kaybetti: "olmadı", devam: "devam ediyor", yok: "" };
-    for (var gn = bugun; gn >= 1; gn--) {
+    if (bugun < 1) liste.textContent = "Arşiv 3 Ekim 2026’da ilk bulmacayla başlayacak.";
+    for (var gn = Math.min(bugun, Veri.BULMACALAR.length); gn >= 1; gn--) {
       var durum = gunDurumu(gn);
       var satir = document.createElement("button");
       satir.className = "arsiv-satir" + (gn === oyun.gunNo ? " secili" : "");
@@ -1789,43 +1844,17 @@ window.BaglantilarDepo = (function () {
       liste.appendChild(satir);
     }
   }
-  function arsivGun(gn) {
+  async function arsivGun(gn) {
+    if (!Number.isInteger(gn) || gn < 1 || gn > Math.min(bugunNo(), Veri.BULMACALAR.length)) return;
     perdeKapat("perdeArsiv");
-    gunuKur(gn);
+    await gunuKur(gn);
     ciz();
     window.scrollTo(0, 0);
     if (oyun.durum !== "oyunda") setTimeout(sonucGoster, 250);
+    else if (!ayarlar.yardimGizle) yardimAc(true);
   }
 
-  // --- önizleme yardımı (yalnızca artifact önizlemesinde etkin) ---
-  function onizlemeYeniBulmaca() {
-    var ridx = Math.floor(Math.random() * Veri.BULMACALAR.length);
-    oyun = {
-      mod: "gunluk", gunNo: bugunNo(), idx: ridx, onizleme: true,
-      siralama: karistir(kelimeListesiYap(Veri.BULMACALAR[ridx])),
-      secili: [], cozulen: [], tahminler: [], gecmisTahminler: [], hata: 0, durum: "oyunda",
-      kaydedildi: true
-    };
-  }
-  function onizlemeKur() {
-    var btn = document.createElement("button");
-    btn.className = "dugme";
-    btn.textContent = "Baştan oyna";
-    btn.setAttribute("aria-label", "Yeni bulmacayla baştan oyna");
-    btn.style.cssText = "position:fixed;left:50%;bottom:1rem;transform:translateX(-50%);" +
-      "z-index:40;box-shadow:var(--golge);background:var(--panel);";
-    btn.addEventListener("click", function () {
-      document.querySelectorAll(".perde.acik").forEach(function (p) { p.classList.remove("acik"); });
-      onizlemeYeniBulmaca();
-      ciz();
-      window.scrollTo(0, 0);
-      toast("Yeni bulmaca");
-    });
-    document.body.appendChild(btn);
-  }
-
-  // --- başlangıç ---
-  function baglantilariKur() {
+  async function baglantilariKur() {
     // Türkçe büyük harf (i → İ): CSS text-transform yerele bağlıdır; önizlemede
     // <html lang="tr"> sarmalayıcısı düşerse burada garanti altına alınır.
     document.documentElement.setAttribute("lang", "tr");
@@ -1897,15 +1926,15 @@ window.BaglantilarDepo = (function () {
 
     temaUygula();
     renkKoruUygula();
-    yeniOyun();
+    await yeniOyun();
     ciz();
     window.addEventListener("resize", uygulaKutuFont);
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(uygulaKutuFont);
 
-    if (window.BAGLANTILAR_ONIZLEME) onizlemeKur();
+
 
     // Oyun açılınca "Nasıl oynanır" pop-up'ı otomatik gelsin (kullanıcı gizlemediyse).
-    if (!ayarlar.yardimGizle) yardimAc(true);
+    if (oyun.durum !== "bekliyor" && !ayarlar.yardimGizle && location.hash!=="#arsiv") yardimAc(true);
   }
 
   if (document.readyState === "loading")
@@ -1927,7 +1956,7 @@ window.BaglantilarDepo = (function () {
   <h2>Sık sorulan sorular</h2>
   <p class="tp-sss"><strong>Yeni bulmaca ne zaman gelir?</strong> Her gün Türkiye saatiyle 00.00'de; herkes aynı bulmacayı çözer.</p>
   <p class="tp-sss"><strong>Sonucumu nasıl paylaşırım?</strong> Bulmaca bitince renk karelerinden oluşan özetini tek dokunuşla kopyalayıp paylaşabilirsin.</p>
-  <p class="tp-sss"><strong>Verilerim toplanıyor mu?</strong> Hayır, ilerleme ve istatistikler yalnızca kendi cihazında durur; üyelik yoktur.</p>
+  <p class="tp-sss"><strong>Verilerim toplanıyor mu?</strong> İlerlemen ve istatistiklerin tarayıcında saklanır; hesap gerekmez. Tahminlerin ve hamlelerin, kontrol edilmek üzere oyun sunucusuna gönderilir.</p>
 </section>
 
 <footer class="tp-footer">
@@ -2002,122 +2031,25 @@ window.BaglantilarDepo = (function () {
     var de=document.getElementById("tpDate");
     if(de) de.textContent=d.getDate()+" "+ay[d.getMonth()]+" "+d.getFullYear();
   }catch(e){}
-  /* Bulmaca numarası: oyunun kendi bugunNo() mantığı (BASLANGIC = 1 Ağustos 2026). */
+  /* Bulmaca numarası: oyunun kendi bugunNo() mantığı (BASLANGIC = 3 Ekim 2026). */
   try{
-    var BASLANGIC=Date.UTC(2026,7,1);
+    var BASLANGIC=Date.UTC(2026,9,3);
     var t=TrPuzzleClock.calendar();
     var g=Date.UTC(t.getFullYear(),t.getMonth(),t.getDate());
     var no=Math.floor((g-BASLANGIC)/86400000)+1;
-    if(no>=1){ var nel=document.getElementById("tpNo"); if(nel) nel.textContent="No."+no; }
+    if(no>=1 && no<=window.BaglantilarVeri.BULMACALAR.length){ var nel=document.getElementById("tpNo"); if(nel) nel.textContent="No."+no; }
   }catch(e){}
   var b=document.getElementById("tpPlay");
   if(b) b.addEventListener("click",function(){ s.hidden=true; tpUstSerit(false); });
 })();
 </script>
-<!-- TRPUZZLE-PROGRESS-START -->
-<script>
-/* Üretilen dosya: trpuzzlemain/tools/sync_splash_progress.py */
-(function () {
-  "use strict";
-  function readProgress(key) {
-    try {
-      const value = JSON.parse(localStorage.getItem(key));
-      return value && typeof value === "object" && !Array.isArray(value) ? value : {};
-    } catch (e) { return {}; }
-  }
 
-  function hasGuesses(value) {
-    return Array.isArray(value) && value.length > 0;
-  }
-
-  function dailyProgress(now, selectedLevel) {
-    const tr = new Date(now.getTime() + 3 * 60 * 60 * 1000);
-    const year = tr.getUTCFullYear(), month = tr.getUTCMonth(), day = tr.getUTCDate();
-    const date = year + "-" + String(month + 1).padStart(2, "0") + "-" + String(day).padStart(2, "0");
-    const dayId = Math.floor(Date.UTC(year, month, day) / 86400000);
-    const puzzleNo = dayId - Date.UTC(2026, 7, 1) / 86400000 + 1;
-    const midnight = Date.UTC(year, month, day);
-    const foxNo = Math.floor((midnight - Date.UTC(2026, 7, 1)) / 86400000) + 1;
-    const aralaDay = Math.round((midnight - Date.UTC(2026, 0, 1)) / 86400000);
-
-    const harfle = readProgress("trw-" + date);
-    const settings = readProgress("word500tr.ayarlar");
-    if (selectedLevel) settings.seviye = selectedLevel;
-    const level = ["kolay", "standart", "zor"].includes(settings.seviye) ? settings.seviye : "standart";
-    // Harf500 açılışta son seçilen seviyeyi yükler.
-    const harf500 = readProgress("word500tr.oyun." + level + "." + date);
-    const baklava = readProgress("petek-progress-v1")[dayId] || {};
-    const tilkile = readProgress("foximax-daily-" + foxNo);
-    const bagla = readProgress("baglantilar.gunluk." + puzzleNo);
-    const sehirle = readProgress("iller-globle:daily:" + date);
-    const oldArala = readProgress("aradle_day_v1");
-    const arala = readProgress("aradle_days_v2")[aralaDay] ||
-      (oldArala.day === aralaDay ? oldArala : {});
-
-    const started = {
-      Harfle: hasGuesses(harfle.guesses) && !harfle.done && !harfle.win,
-      Harf500: harf500.surum === 1 && hasGuesses(harf500.gecmis) && !harf500.bitti && !harf500.kazandi,
-      Baklava: baklava.phase === "play" && typeof baklava.swapsLeft === "number" &&
-        baklava.swapsLeft > 0 && baklava.swapsLeft < 15,
-      Arala: typeof arala.steps === "number" && arala.steps > 0 && !arala.done && !arala.lost && !arala.g,
-      Tilkile: tilkile.status === "playing" && hasGuesses(tilkile.guessed),
-      // Kesme tek hamlede biter; kaydedilmiş, yarım kalmış bir turu yoktur.
-      Kesme: false,
-      "Bağla": bagla.durum === "oyunda" && hasGuesses(bagla.tahminler),
-      "Şehirle": hasGuesses(sehirle.guesses) && !sehirle.won && !sehirle.gaveUp
-    };
-    // Tüm günlük kayıtlar Türkiye tarihini kullanır; Kesme tek hamlede biter.
-    const kesme = readProgress("kesme2-day-" + date);
-    const aralaResult = readProgress("aradle_result_v1")[aralaDay];
-    const completed = {
-      Harfle: harfle.done === true || harfle.win === true,
-      Harf500: harf500.surum === 1 && (harf500.bitti === true || harf500.kazandi === true),
-      Baklava: baklava.phase === "win" || baklava.phase === "lose",
-      Arala: arala.done === true || arala.lost === true || arala.g === true ||
-        (typeof aralaResult === "number" && (aralaResult === -1 || (aralaResult >= 1 && aralaResult <= 5))),
-      Tilkile: tilkile.status === "won" || tilkile.status === "lost",
-      Kesme: Array.isArray(kesme.cut) && kesme.cut.length === 4,
-      "Bağla": bagla.durum === "kazandi" || bagla.durum === "kaybetti",
-      "Şehirle": sehirle.won === true || sehirle.gaveUp === true
-    };
-    const states = {};
-    Object.keys(started).forEach(function (game) {
-      states[game] = completed[game] ? "completed" : started[game] ? "started" : "new";
-    });
-    return states;
-  }
-
-
-  window.TrPuzzleProgress = dailyProgress;
-  function refresh() {
-    const button = document.getElementById("tpPlay");
-    const title = document.querySelector("#tp-splash .tp-name");
-    if (!button || !title) return;
-    const selected = document.querySelector('#tpSeg [data-seviye][aria-checked="true"]');
-    const state = dailyProgress(new Date(), selected && selected.getAttribute("data-seviye"))[title.textContent.trim()];
-    button.textContent = state === "completed" ? "Sonucu Gör" : state === "started" ? "Devam Et" : "Oyna";
-  }
-  refresh();
-  window.addEventListener("pageshow", refresh);
-  window.addEventListener("storage", refresh);
-  window.addEventListener("focus", refresh);
-  document.addEventListener("visibilitychange", function () { if (!document.hidden) refresh(); });
-  const segment = document.getElementById("tpSeg");
-  if (segment) {
-    segment.addEventListener("click", refresh);
-    segment.addEventListener("keydown", refresh);
-  }
-  setInterval(function () { if (!document.hidden) refresh(); }, 60000);
-
-})();
-</script>
-<!-- TRPUZZLE-PROGRESS-END -->
 <!-- game-experience-start -->
 <script>
 /* Oyunların ortak kısa anlatımı ve sonuçtan sonraki gezinme. */
 (function () {
-  const names = ['Harfle','Harf500','Baklava','Arala','Tilkile','Kesme','Bağla','Şehirle'];
-  const paths = ['harfle','harf500','baklava','arala','tilkile','kesme','bagla','sehirle'];
+  const names = ['Harfle','Baklava','Bağla','Kesme','Tilkile','Arala','Şehirle','Harf500'];
+  const paths = ['harfle','baklava','bagla','kesme','tilkile','arala','sehirle','harf500'];
   const title = document.querySelector('#tp-splash .tp-name');
   const game = title && title.textContent.trim();
   const configs = {
@@ -2261,7 +2193,8 @@ window.BaglantilarDepo = (function () {
       const message=next?'Bugün bir bulmaca daha?':'Harika, bugünkü sekiz oyunu tamamladın!';
       if(section.firstChild.textContent!==message)section.firstChild.textContent=message;
       const link=section.querySelector('.tp-next-game');
-      if(link.hidden!==!next)link.hidden=!next;
+      link.hidden=false;
+      if(!next) { link.textContent='Arşivden oyna'; link.setAttribute('href','/'+(game==='Şehirle'?'harfle':paths[names.indexOf(game)])+'/#arsiv'); }
       if(next) { const label=next+' · '+(progress[next]==='started'?'Devam Et':'Oyna');if(link.textContent!==label)link.textContent=label;const href='/'+paths[names.indexOf(next)]+'/';if(link.getAttribute('href')!==href)link.setAttribute('href',href); }
     });
   }
