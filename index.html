@@ -1059,7 +1059,6 @@ c0 -41 -6 -73 -15 -88 -19 -28 -100 -82 -139 -92 l-29 -7 7 -83 c8 -101 3
     <div class="dagilim" id="dagilim"></div>
     <div class="modal-alt">
       <button class="dugme birincil" id="btnPaylasIst">Sonucu paylaş</button>
-      <button class="dugme" id="btnSifirla">İstatistikleri sıfırla</button>
     </div>
   </div>
 </div>
@@ -1149,7 +1148,6 @@ window.BaglantilarDepo = (function () {
       }), ["oynanan","kazanilan","seri","enUzun","kusursuz","sonGun","sonKazanan"], [0,1,2,3,4], "dagilim");
     },
     istKaydet: function (i) { yaz(IST, i); },
-    istSifirla: function () { try { localStorage.removeItem(IST); } catch (e) {} },
 
     gunluk: function (gunNo) { return oku("baglantilar.2026-10-03.gunluk." + gunNo, null); },
     gunlukKaydet: function (gunNo, d) { yaz("baglantilar.2026-10-03.gunluk." + gunNo, d); }
@@ -1918,11 +1916,6 @@ window.BaglantilarDepo = (function () {
     });
 
     el("btnPaylasIst").addEventListener("click", paylas);
-    el("btnSifirla").addEventListener("click", function () {
-      if (confirm("Tüm istatistikler silinsin mi?")) {
-        Depo.istSifirla(); istatistikGoster(); toast("İstatistikler sıfırlandı");
-      }
-    });
 
     temaUygula();
     renkKoruUygula();
@@ -1960,8 +1953,10 @@ window.BaglantilarDepo = (function () {
 </section>
 
 <footer class="tp-footer">
-  Bir <a href="https://trpuzzle.com/">TrPuzzle</a> oyunu ·
-  <a href="https://trpuzzle.com/">Anasayfa</a> · <a href="https://trpuzzle.com/hakkinda.html">Hakkımızda</a> · <a href="https://trpuzzle.com/gizlilik.html">Gizlilik</a> · <a href="https://trpuzzle.com/kosullar.html">Koşullar</a>
+  Bir <a href="/">TrPuzzle</a> oyunu
+  <nav aria-label="Site bilgileri">
+    <a href="/">Anasayfa</a> · <a href="/hakkinda.html">Hakkımızda</a> · <a href="/iletisim.html">İletişim</a> · <a href="/gizlilik.html">Gizlilik ve Çerezler</a> · <a href="/kosullar.html">Kullanım Koşulları</a>
+  </nav>
 </footer>
 <style>
 /* ── TrPuzzle bilgi bölümü ve mini footer ── */
