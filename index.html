@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="tr" data-tema="acik">
 <head>
+<script defer id="tp-privacy-script" src="/assets/privacy-controls.js?v=consent-v1"></script>
+<meta name="google-adsense-account" content="ca-pub-7993571496408496">
+
 <script src="/assets/game-remote.js"></script>
 <!-- game-security-start -->
 <script>
@@ -635,7 +638,7 @@ html.tp-splash-acik{background:#fff}
 </script>
 <!-- game-clock-end -->
 <style>#tpPlay:not([data-progress-ready]){visibility:hidden}</style>
-<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7993571496408496" crossorigin="anonymous"></script>
+
 </head>
 <body>
 <div id="tp-splash">
@@ -1057,9 +1060,7 @@ c0 -41 -6 -73 -15 -88 -19 -28 -100 -82 -139 -92 l-29 -7 7 -83 c8 -101 3
       <div><div class="deger" id="istEnUzun">0</div><div class="ad">En uzun</div></div>
     </div>
     <div class="dagilim" id="dagilim"></div>
-    <div class="modal-alt">
-      <button class="dugme birincil" id="btnPaylasIst">Sonucu paylaş</button>
-    </div>
+    <div id="istPaylas"></div>
   </div>
 </div>
 
@@ -1691,6 +1692,7 @@ window.BaglantilarDepo = (function () {
   function istGunKur() {
     var gun = el("istGun");
     gun.innerHTML = "";
+    el("istPaylas").innerHTML = "";
     var bitti = (oyun.durum === "kazandi" || oyun.durum === "kaybetti");
     var oynandi = oyun.tahminler.length > 0;
 
@@ -1744,14 +1746,12 @@ window.BaglantilarDepo = (function () {
       pay.textContent = "Sonucu paylaş";
       pay.addEventListener("click", paylas);
       alt.appendChild(pay);
-      gun.appendChild(alt);
+      el("istPaylas").appendChild(alt);
     }
   }
 
   function istatistikGoster() {
     istGunKur();
-    var bitti = (oyun.durum === "kazandi" || oyun.durum === "kaybetti");
-    el("btnPaylasIst").style.display = bitti ? "" : "none";
     var ist = Depo.istatistik();
     el("istOynanan").textContent = ist.oynanan;
     el("istYuzde").textContent = ist.oynanan ? Math.round(ist.kazanilan / ist.oynanan * 100) : 0;
@@ -1915,7 +1915,6 @@ window.BaglantilarDepo = (function () {
       Depo.ayarKaydet(ayarlar); renkKoruUygula();
     });
 
-    el("btnPaylasIst").addEventListener("click", paylas);
 
     temaUygula();
     renkKoruUygula();
